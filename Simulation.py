@@ -1,41 +1,52 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+import networkx as nx
 
+## --------------- { GLOBALS } --------------- ##
 np.random.seed(12378911)
 nNodes = 20
+nAgents = 5
 
 
-cityPositions = np.random.randint(0, high=10, size=(nNodes,2))
+## --------------- { INIT } --------------- ##
+
+def initAgents(nAgents):
+    agents = np.zeros((nAgents, 3), dtype=np.int8)
+    for i in range(nAgents):
+        cityIndexes = [x for x in range(nNodes)]
+        startCity = np.random.choice(cityIndexes, 1)
+        currentCity = startCity
+        cityIndexes.remove(startCity)
+        endCity = np.random.choice(cityIndexes, 1)
+        agents[i, 0] = currentCity
+        agents[i, 1] = startCity
+        agents[i, 2] = endCity
+    return agents
+
 
 def buildPaths(cities, maxDist):
-    cityMap = np.zeros((nNodes,nNodes))
+    cityMap = np.zeros((nNodes, nNodes))
     for i in range(len(cities)):
         currentCityPos = cities[i, :]
         minDist = 100000
         minDistPos = [None]*2
         for j in range(len(cities)):
-            nextCityPos = cities[j,:]
+            nextCityPos = cities[j, :]
             if i != j:
-                distance = np.sqrt((currentCityPos[0] - nextCityPos[0])**2 + \
-                    (currentCityPos[1] - nextCityPos[1])**2)
+                distance = np.sqrt((currentCityPos[0] - nextCityPos[0])**2 +
+                                   (currentCityPos[1] - nextCityPos[1])**2)
                 if distance < minDist:
                     minDist = distance
                     minDistPos[0] = i
                     minDistPos[1] = j
-                print(distance)
                 if distance <= maxDist:
-                    cityMap[i,j] = 1
-        cityMap[minDistPos[0],minDistPos[1]] = 1
-
+                    cityMap[i, j] = 1
+        cityMap[minDistPos[0], minDistPos[1]] = 1
     return cityMap
 
-cityMap = buildPaths(cityPositions,3)
 
-
-#cityMap = np.random.randint(0, high=2, size=(nNodes, nNodes))
-
-#cityMap = np.triu(cityMap, k=1)
+## --------------- { PLOTTING } --------------- ##
 
 def PlotGraph(edges, nodes):
     indecesOfEdges = np.where(edges == 1)
@@ -45,7 +56,7 @@ def PlotGraph(edges, nodes):
                        nodes[indecesOfEdges[1], 1]]
 
     plt.figure()
-    plt.gca().set_aspect('equal', adjustable='box')
+    ax = plt.gca().set_aspect('equal', adjustable='box')
     markerSize = 10
     fontSize = 30
     lineWidth = 1
@@ -59,4 +70,14 @@ def PlotGraph(edges, nodes):
     plt.show()
 
 
-PlotGraph(cityMap,cityPositions)
+## --------------- { RUNNING } --------------- ##
+
+cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
+cityMap = buildPaths(cityPositions, 3)
+agents = initAgents(nAgents)
+G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
+
+print(cityPositions)
+print(nx.dijkstra_path(G, 0, 1))
+
+PlotGraph(cityMap, cityPositions)
