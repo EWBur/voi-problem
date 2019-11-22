@@ -5,10 +5,10 @@ import random
 np.random.seed(12378911)
 nNodes = 20
 
-
 cityPositions = np.random.randint(0, high=10, size=(nNodes,2))
 
 def buildPaths(cities, maxDist):
+    nNodes = len(cities[:,0])
     cityMap = np.zeros((nNodes,nNodes))
     for i in range(len(cities)):
         currentCityPos = cities[i, :]
@@ -23,13 +23,11 @@ def buildPaths(cities, maxDist):
                     minDist = distance
                     minDistPos[0] = i
                     minDistPos[1] = j
-                print(distance)
                 if distance <= maxDist:
                     cityMap[i,j] = 1
         cityMap[minDistPos[0],minDistPos[1]] = 1
-
+    
     return cityMap
-
 cityMap = buildPaths(cityPositions,3)
 
 
