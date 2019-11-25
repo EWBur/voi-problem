@@ -55,22 +55,6 @@ def Mutation(chromosome,mutationProbability, creepRate):
     
     return chromosome
 
-'''
-    nCities = len(cities[:,0])
-    cityDistancesX = np.tile(cities[:,0],(nCities,1)) - np.tile(cities[:,0],(nCities,1)).T
-    cityDistancesY = np.tile(cities[:,1],(nCities,1)) - np.tile(cities[:,1],(nCities,1)).T
-    cityDistances = np.sqrt(cityDistancesX**2 + cityDistancesY**2)
-    
-    cityMap = np.heaviside(-(cityDistances - maxDist),0)
-    cityMap = cityMap - np.diag(np.diag(cityMap))
-
-    #nConnections = np.sum(cityMap,0)
-    indexOfMinNeighbour = np.argmin(cityDistances + np.diagflat(np.ones(nCities)),1)
-    print(indexOfMinNeighbour)
-    for i in range(nCities):
-        cityMap[indexOfMinNeighbour[i],i] = 1
-    '''
-
 nCities = 20
 populationSize = 30
 nVois = 100
