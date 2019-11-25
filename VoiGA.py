@@ -83,8 +83,8 @@ population = InitializePopulation(nCities,populationSize)
 
 greatestFitness = np.zeros(noTimeSteps+1)
 for iTime in range(noTimeSteps):
-    if np.mod(iTime,noTimeSteps/10) == 0:
-        print('Progress: ' + str(iTime/noTimeSteps*100) + ' %')
+    if np.mod(iTime+1,noTimeSteps/10) == 0:
+        print('Progress: ' + str((iTime+1)/noTimeSteps*100) + ' %')
     
     decodedPopulation = DecodePopulation(nVois,population,zeroThreshold)
     populationFitness = FitnessOfPopulation(decodedPopulation)
@@ -114,6 +114,6 @@ for iTime in range(noTimeSteps):
             
     newPopulation[0:elitismNumber,:] = bestChromosome  
     population = newPopulation
-    
+   
 PlotFitness(noTimeSteps,greatestFitness)
     
