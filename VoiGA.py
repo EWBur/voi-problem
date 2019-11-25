@@ -8,7 +8,11 @@ def InitializePopulation(nCities,populationSize):
 def DecodePopulation(nVois,population,zeroThreshold):
     nCities = np.size(population,1)
     
-    decodedPopulation = np.round(population/(np.tile(np.sum(population,1),(nCities,1))).T*nVois)
+    populationCopy = np.zeros((np.size(population,0),np.size(population,1)))
+    populationCopy[:,:] = population[:,:]
+    populationCopy[populationCopy < zeroThreshold] = 0
+    
+    decodedPopulation = np.floor(population/(np.tile(np.sum(population,1),(nCities,1))).T*nVois)
     
     ### FIX ###
     for i in range(populationSize):
@@ -55,6 +59,15 @@ def Mutation(chromosome,mutationProbability, creepRate):
     
     return chromosome
 
+def PlotFitness(noTimeSteps,greatestFitness):
+    plt.figure()
+    plt.plot(np.linspace(0,noTimeSteps,noTimeSteps+1),greatestFitness,'k')
+    
+    fontSize = 15
+    plt.xlabel('Time',fontsize=fontSize)
+    plt.ylabel('Greatest fitness',fontsize=fontSize)
+    plt.tick_params(axis='both', labelsize=fontSize)
+
 nCities = 20
 populationSize = 30
 nVois = 100
@@ -62,7 +75,7 @@ tournamentSize = 2
 tournamentProbability = 0.7
 mutationProbability = 1/nCities
 creepRate = 0.1
-noTimeSteps = 1
+noTimeSteps = 100
 elitismNumber = 1
 zeroThreshold = 0.15
 
@@ -70,6 +83,9 @@ population = InitializePopulation(nCities,populationSize)
 
 greatestFitness = np.zeros(noTimeSteps+1)
 for iTime in range(noTimeSteps):
+    if np.mod(iTime,noTimeSteps/10) == 0:
+        print('Progress: ' + str(iTime/noTimeSteps*100) + ' %')
+    
     decodedPopulation = DecodePopulation(nVois,population,zeroThreshold)
     populationFitness = FitnessOfPopulation(decodedPopulation)
     
@@ -99,5 +115,5 @@ for iTime in range(noTimeSteps):
     newPopulation[0:elitismNumber,:] = bestChromosome  
     population = newPopulation
     
-plt.plot(np.linspace(0,noTimeSteps,noTimeSteps+1),greatestFitness)
+PlotFitness(noTimeSteps,greatestFitness)
     
