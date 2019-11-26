@@ -75,7 +75,7 @@ tournamentSize = 2
 tournamentProbability = 0.7
 mutationProbability = 1/nCities
 creepRate = 0.1
-noTimeSteps = 100
+noTimeSteps = 2000
 elitismNumber = 1
 zeroThreshold = 0.15
 
