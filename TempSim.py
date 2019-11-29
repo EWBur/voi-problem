@@ -57,8 +57,11 @@ def pathFinding(agent, cityMap, vois, voiUsage):
             return (path, voiUsage)
     return (path, voiUsage)
 
-def pathFindingDistances(agent, cityMap, vois, voiUsage):
+def pathFindingDistances(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDirection):
     (current, start, end) = agent
+    if reverseDirection == 1:
+        (current, end, start) = agent
+    
     G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
     path = nx.dijkstra_path(G, start, end)
     
@@ -72,7 +75,9 @@ def pathFindingDistances(agent, cityMap, vois, voiUsage):
          
         if hasVoi == 1:
             voiUsage += cityMap[currentNode,path[nodeIndex+1]]
-    return (path, voiUsage)
+            
+        maxVoiUsage += cityMap[currentNode,path[nodeIndex+1]]
+    return (path, voiUsage, maxVoiUsage)
 
 
 ## --------------- { PLOTTING } --------------- ##
@@ -109,12 +114,15 @@ def runSimulation(voiPositions, nNodes, nAgents):
     agents = initAgents(nAgents, nNodes)
     voiUsage = 0
     
+    maxVoiUsage = 0
     for a in agents:
-        (path, voiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage)
-    #print(voiPositions)
-    #print(' ------- ')
+        (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)
+        
+    #Go reverse direction (end -> start)    
+    for a in agents:
+        (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)
     
-    return voiUsage
+    return (voiUsage, maxVoiUsage)
 
 
 #print(voiUsage)
