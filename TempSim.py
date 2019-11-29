@@ -47,7 +47,7 @@ def pathFinding(agent, cityMap, vois, voiUsage):
     (current, start, end) = agent
     G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
     path = nx.dijkstra_path(G, start, end)
-    for c in path[0: -2]:
+    for c in path[0: -1]:
         if vois[c] > 0:
             voiUsage += 1
             vois[c] -= 1
@@ -89,6 +89,7 @@ def runSimulation(voiPositions, nNodes, nAgents):
     cityMap = buildPaths(cityPositions, 3, nNodes)
     agents = initAgents(nAgents, nNodes)
     voiUsage = 0
+    
     for a in agents:
         (path, voiUsage) = pathFinding(a, cityMap, voiPositions, voiUsage)
     #print(voiPositions)
