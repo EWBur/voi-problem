@@ -9,7 +9,7 @@ import time
 
 ## --------------- { INIT } --------------- ##
 
-def initAgents(nAgents, nNodes):  # AGENTS SHOULD NOT START AND END AT SAME NODE
+def initAgents(nAgents, nNodes):  # AGENTS SHOULD NOT START AND END AT SAME NODE. # Redan fixat? - Jesper
     agents = np.zeros((nAgents, 3), dtype=np.int8)
     for i in range(nAgents):
         cityIndexes = [x for x in range(nNodes)]
