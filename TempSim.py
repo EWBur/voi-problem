@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import networkx as nx
+import time
 
 ## --------------- { GLOBALS } --------------- ##
 
@@ -38,7 +39,8 @@ def buildPaths(cities, maxDist, nNodes):
                     minDistPos[0] = i
                     minDistPos[1] = j
                 if distance <= maxDist:
-                    cityMap[i, j] = 1
+                    #cityMap[i, j] = 1
+                    cityMap[i, j] = distance
         cityMap[minDistPos[0], minDistPos[1]] = 1
     return cityMap
 
@@ -94,7 +96,7 @@ def runSimulation(voiPositions, nNodes, nAgents):
         (path, voiUsage) = pathFinding(a, cityMap, voiPositions, voiUsage)
     #print(voiPositions)
     #print(' ------- ')
-
+    
     return voiUsage
 
 
