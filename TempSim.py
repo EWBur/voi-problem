@@ -79,6 +79,12 @@ def pathFindingDistances(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDire
         maxVoiUsage += cityMap[currentNode,path[nodeIndex+1]]
     return (path, voiUsage, maxVoiUsage)
 
+def ShuffleAgents(agents,nGroups):
+    groupSize = int(np.floor(np.size(agents,0)/nGroups))
+    for groupIndex in range(nGroups):
+        np.random.shuffle(agents[groupIndex*groupSize:(groupIndex+1)*groupSize])
+    return agents
+
 
 ## --------------- { PLOTTING } --------------- ##
 
@@ -114,16 +120,16 @@ def runSimulation(voiPositions, nNodes, nAgents):
     agents = initAgents(nAgents, nNodes)
     voiUsage = 0
     
+    agents = ShuffleAgents(agents,10)
     maxVoiUsage = 0
     for a in agents:
         (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)
         
-    #Go reverse direction (end -> start)    
+    #Go reverse direction (end -> start)
+    agents = ShuffleAgents(agents,10)
     for a in agents:
         (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)
     
     return (voiUsage, maxVoiUsage)
 
-
-#print(voiUsage)
 #PlotGraph(cityMap, cityPositions)
