@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import TempSim
-
+#%matplotlib qt
+import time
 
 def InitializePopulation(nCities, populationSize):
     population = np.random.rand(populationSize, nCities)
@@ -34,10 +35,12 @@ def FitnessOfPopulation(decodedPopulation, nCities, nAgents):
     #populationFitness = np.sum(decodedPopulation[:, 0:5], 1)
     nIndividuals = np.size(decodedPopulation, 0)
     populationFitness = np.zeros(nIndividuals)
+    maxPopulationFitness = np.zeros(nIndividuals)
+    
     for vv in range(nIndividuals):
-        populationFitness[vv] = TempSim.runSimulation(
+        (populationFitness[vv], maxPopulationFitness[vv]) = TempSim.runSimulation(
             decodedPopulation[vv, :], nCities, nAgents)
-    return populationFitness
+    return populationFitness, maxPopulationFitness
 
 
 def TournamentSelection(populationFitness, tournamentSize, tournamentProbability):
@@ -87,16 +90,20 @@ def PlotFitness(noTimeSteps, greatestFitness):
     plt.ylabel('Greatest fitness', fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
 
+plt.close("all")
 
+#Model parameters
 nCities = 20
-nAgents = 25
-populationSize = 30
-nVois = 1000
+nAgents = 10
+nVois = 10
+
+#GA parameters
+noTimeSteps = 1
+populationSize = 1
 tournamentSize = 2
 tournamentProbability = 0.7
 mutationProbability = 1/nCities
 creepRate = 0.1
-noTimeSteps = 2000
 elitismNumber = 1
 zeroThreshold = 0
 
@@ -108,7 +115,7 @@ for iTime in range(noTimeSteps):
         print('Progress: ' + str((iTime+1)/noTimeSteps*100) + ' %')
 
     decodedPopulation = DecodePopulation(nVois, population, zeroThreshold)
-    populationFitness = FitnessOfPopulation(
+    populationFitness, maxPopulationFitness = FitnessOfPopulation(
         decodedPopulation, nCities, nAgents)
 
     generationGreatestFitness = np.max(populationFitness)
