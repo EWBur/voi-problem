@@ -61,6 +61,7 @@ def pathFindingDistances(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDire
     (current, start, end) = agent
     if reverseDirection == 1:
         (current, end, start) = agent
+        current = end
     
     G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
     path = nx.dijkstra_path(G, start, end)
@@ -83,6 +84,20 @@ def ShuffleAgents(agents,nGroups):
     groupSize = int(np.floor(np.size(agents,0)/nGroups))
     for groupIndex in range(nGroups):
         np.random.shuffle(agents[groupIndex*groupSize:(groupIndex+1)*groupSize])
+    return agents
+
+def MutateAgents(agents,agentMutationProbability):
+    nAgents = np.size(agents,0)
+    nMutations = int(np.round(nAgents*agentMutationProbability))
+    mutationIndeces = np.random.randint(0,nAgents,(nMutations,2))
+    
+    for iMutation in range(nMutations):
+        end1 = agents[mutationIndeces[iMutation,0],2]
+        end2 = agents[mutationIndeces[iMutation,1],2]
+        
+        agents[mutationIndeces[iMutation,0],2]  = end2
+        agents[mutationIndeces[iMutation,1],2]  = end1
+    
     return agents
 
 
@@ -119,14 +134,18 @@ def runSimulation(voiPositions, nNodes, nAgents):
     cityMap = buildPaths(cityPositions, 3, nNodes)
     agents = initAgents(nAgents, nNodes)
     voiUsage = 0
-    
-    agents = ShuffleAgents(agents,10)
     maxVoiUsage = 0
+    groupSize = nAgents
+    agentMutationProbability = 0
+    
+    agents = MutateAgents(agents,agentMutationProbability)
+    
+    agents = ShuffleAgents(agents,groupSize)
     for a in agents:
         (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)
         
     #Go reverse direction (end -> start)
-    agents = ShuffleAgents(agents,10)
+    agents = ShuffleAgents(agents,groupSize)
     for a in agents:
         (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)
     
