@@ -86,18 +86,14 @@ def ShuffleAgents(agents,nGroups):
         np.random.shuffle(agents[groupIndex*groupSize:(groupIndex+1)*groupSize])
     return agents
 
-def MutateAgents(agents,agentMutationProbability):
+def MutateAgents(agents,nMutations,nNodes):
     nAgents = np.size(agents,0)
-    nMutations = int(np.round(nAgents*agentMutationProbability))
-    mutationIndeces = np.random.randint(0,nAgents,(nMutations,2))
+    mutationIndeces = np.random.randint(0,nAgents,nMutations)
     
     for iMutation in range(nMutations):
-        end1 = agents[mutationIndeces[iMutation,0],2]
-        end2 = agents[mutationIndeces[iMutation,1],2]
-        
-        agents[mutationIndeces[iMutation,0],2]  = end2
-        agents[mutationIndeces[iMutation,1],2]  = end1
-    
+        randomNode = np.random.randint(0,nNodes)
+        randomStartEnd = np.random.randint(1,3)    
+        agents[mutationIndeces[iMutation],randomStartEnd]  = randomNode   
     return agents
 
 
@@ -136,9 +132,9 @@ def runSimulation(voiPositions, nNodes, nAgents):
     voiUsage = 0
     maxVoiUsage = 0
     groupSize = nAgents
-    agentMutationProbability = 0
     
-    agents = MutateAgents(agents,agentMutationProbability)
+    nMutations = int(np.round(0.3*nAgents))
+    agents = MutateAgents(agents,nMutations,nNodes)
     
     agents = ShuffleAgents(agents,groupSize)
     for a in agents:
