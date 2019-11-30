@@ -2,12 +2,29 @@ import numpy as np
 import matplotlib.pyplot as plt
 import TempSim
 #%matplotlib qt
-import time
+
+def FitnessOfPopulation(voiPositions, nCities, nAgents):
+    fitness, maxFitness = TempSim.runSimulation(voiPositions, nCities, nAgents)
+    return fitness, maxFitness
 
 #Model parameters
 nCities = 20
 nAgents = 10
-nVois = 2*nCities
-noTimeSteps = 1
+nVois = 5*nCities
+nTimeSteps = 100
 
 voiPositions = np.ones(nCities)*nVois/nCities
+
+fitness = np.zeros(nTimeSteps)
+maxFitness = np.zeros(nTimeSteps)
+for iTime in range(nTimeSteps):
+    #voiPositions = np.ones(nCities)*nVois/nCities
+  
+    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents)
+    
+print(voiPositions)    
+    
+plt.figure()
+plt.plot(fitness,'r')
+plt.plot(maxFitness,'--k')
+plt.show()

@@ -88,6 +88,7 @@ def PlotFitness(noTimeSteps, greatestFitness):
     plt.xlabel('Time', fontsize=fontSize)
     plt.ylabel('Greatest fitness', fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
+    plt.show()
 
 plt.close("all")
 
