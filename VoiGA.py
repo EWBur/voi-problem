@@ -32,7 +32,6 @@ def DecodePopulation(nVois, population, zeroThreshold):
 
 
 def FitnessOfPopulation(decodedPopulation, nCities, nAgents):
-    #populationFitness = np.sum(decodedPopulation[:, 0:5], 1)
     nIndividuals = np.size(decodedPopulation, 0)
     populationFitness = np.zeros(nIndividuals)
     maxPopulationFitness = np.zeros(nIndividuals)
