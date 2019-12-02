@@ -49,7 +49,6 @@ def buildPaths(cities, maxDist, nNodes):
 
 def find_path(agent, city_map, vois):
     [current, start, end] = agent
-    has_voi = False
     h, w = np.shape(city_map)
     place_index_map = []
     for i in range(w):
@@ -178,8 +177,6 @@ def PlotGraph(edges, nodes):
 
 def runSimulation(voiPositions, nNodes, nAgents, cityMap, cityPositions):
     #np.random.seed(12378911)
-    #cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
-    #cityMap = buildPaths(cityPositions, 3, nNodes)
     agents = initAgents(nAgents, nNodes)
     
     voiUsage = 0
@@ -189,15 +186,13 @@ def runSimulation(voiPositions, nNodes, nAgents, cityMap, cityPositions):
     nMutations = int(np.round(0*nAgents))
     agents = MutateAgents(agents,nMutations,nNodes)
     
-    #agents = ShuffleAgents(agents,groupSize)
+    agents = ShuffleAgents(agents,groupSize)
     for a in agents:
         (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)
         
     #Go reverse direction (end -> start)
-    #agents = ShuffleAgents(agents,groupSize)
+    agents = ShuffleAgents(agents,groupSize)
     for a in agents:
-        (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)
+        (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)   
     
     return (voiUsage, maxVoiUsage)
-
-#PlotGraph(cityMap, cityPositions)

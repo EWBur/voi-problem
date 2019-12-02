@@ -30,23 +30,25 @@ def PlotGraph(edges, nodes):
     
 plt.close("all")
 
-#Model parameters
-nAgents = 100
-nVois = 3*nCities
-nTimeSteps = 100
-
+#Import map to use
 data_set = np.load('MapToUse.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
 nCities = np.size(cityMap,0)
 
-PlotGraph(cityMap, cityPositions)
+#Model parameters
+nAgents = 50
+nVois = 3*nCities
+nTimeSteps = 100
 
 voiPositions = np.ones(nCities)*nVois/nCities
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
 for iTime in range(nTimeSteps):
+    if np.mod(iTime+1, nTimeSteps/10) == 0:
+        print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
+        
     #voiPositions = np.ones(nCities)*nVois/nCities
   
     fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions)
@@ -56,4 +58,6 @@ print(voiPositions)
 plt.figure()
 plt.plot(fitness,'r')
 plt.plot(maxFitness,'--k')
+
+PlotGraph(cityMap, cityPositions)
 plt.show()

@@ -31,14 +31,17 @@ def DecodePopulation(nVois, population, zeroThreshold):
     return decodedPopulation
 
 
-def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositions):
+def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositions, nRepetitions):
     nIndividuals = np.size(decodedPopulation, 0)
     populationFitness = np.zeros(nIndividuals)
     maxPopulationFitness = np.zeros(nIndividuals)
     
     for vv in range(nIndividuals):
-        (populationFitness[vv], maxPopulationFitness[vv]) = TempSim.runSimulation(
-            decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions)
+        for iRepetition in range(nRepetitions):
+            tempFitness, tempMaxPopulation = TempSim.runSimulation(decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions)
+        
+        populationFitness[vv] += tempFitness/nRepetitions
+        maxPopulationFitness[vv] += tempMaxPopulation/nRepetitions
     return populationFitness, maxPopulationFitness
 
 
@@ -102,8 +105,9 @@ nAgents = 100
 nVois = nCities*2
 
 #GA parameters
-noTimeSteps = 300
-populationSize = 1
+noTimeSteps = 100
+nRepetitions = 1
+populationSize = 30
 tournamentSize = 2
 tournamentProbability = 0.7
 mutationProbability = 1/nCities
@@ -120,7 +124,7 @@ for iTime in range(noTimeSteps):
 
     decodedPopulation = DecodePopulation(nVois, population, zeroThreshold)
     populationFitness, maxPopulationFitness = FitnessOfPopulation(
-        decodedPopulation, nCities, nAgents, cityMap, cityPositions)
+        decodedPopulation, nCities, nAgents, cityMap, cityPositions,nRepetitions)
 
     generationGreatestFitness = np.max(populationFitness)
     if generationGreatestFitness > greatestFitness[iTime]:
