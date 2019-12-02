@@ -71,7 +71,7 @@ def PlotGraph(edges, nodes):
     plt.plot(nodes[:, 0], nodes[:, 1], 'or', markersize=markerSize)
     plt.show()
 
-def find_path(agent,city_map):
+def find_path(agent,city_map, vois):
     [current,start,end] = agent
     has_voi = False
     h,w = np.shape(city_map)
@@ -80,38 +80,47 @@ def find_path(agent,city_map):
         place_index_map.append(
             {
                 'value': math.inf,
-                'visited_cities' : set(),
-                'current_path' : set()
+                'visited_cities' : [],
+                'current_path' : []
             }
         )
-    
     pq = []
     heappush(pq,(0,start))
+    for i in range(w):
+        if not i == start:
+            heappush(pq,(math.inf,i))
     while pq:
         value,place_i = heappop(pq)
         current_place = place_index_map[place_i]
 
         if place_i == end:
             goal = place_index_map[place_i]
-            return goal['current_path']
+            goal['visited_cities'].append(place_i)
+            return (goal['value'],goal['visited_cities'])
 
         neighbourhood_vec = city_map[place_i,:]
         neighbours = np.where(neighbourhood_vec > 0)
+        neighbours = neighbours[0]
         for j in neighbours:
-            n_value = value + city_map[place_i,j]
+            ## THIS IS THE VOI-LOGIC
+            if np.any([ vois[c] >= 1 for c in current_place['visited_cities']+ [j]]):
+                n_value = value + city_map[place_i,j]/2
+            else:
+                n_value = value + city_map[place_i,j]
             path = (place_i,j)
             place_data = place_index_map[j]
             if n_value < place_data['value']:
                 if (place_data['value'],j) in pq:
-                    pq.remove(place_cata['value'],j)
+                    pq.remove((place_data['value'],j))
                 places_visited = current_place['visited_cities'].copy()
                 current_path = current_place['current_path'].copy()
-                current_path.add(path)
-                places_visited.add(place_i)
+                current_path.append(path)
+                places_visited.append(place_i)
                 place_data['value'] = n_value
                 place_data['visited_cities'] = places_visited
+                heappush(pq, (place_data['value'],j))
     print("No Path found")
-    return set()
+    return []
     ## We have to do something if there is no path
 
 ## --------------- { RUNNING } --------------- ##
@@ -119,9 +128,20 @@ def find_path(agent,city_map):
 cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
 cityMap = buildPaths(cityPositions, 3)
 agents = initAgents(nAgents)
+vois = np.zeros(20)
+vois[19] =1
+(cost, path) = find_path([0,0,1],cityMap,vois)
+print(cost)
+print(path)
 G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
+poss = {}
+for i in range(nNodes):
+    poss[i] = cityPositions[i]
+#nx.draw_networkx(G,poss)
+nx.draw_networkx(G, poss,nodelist=path)
 
-print(cityPositions)
 print(nx.dijkstra_path(G, 0, 1))
 
-PlotGraph(cityMap, cityPositions)
+#PlotGraph(cityMap, cityPositions)
+
+plt.show()

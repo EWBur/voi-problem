@@ -2,7 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import networkx as nx
+from heapq import heappush, heappop
 import time
+import math
 
 ## --------------- { GLOBALS } --------------- ##
 
@@ -45,6 +47,57 @@ def buildPaths(cities, maxDist, nNodes):
     return cityMap
 
 
+def find_path(agent, city_map, vois):
+    [current, start, end] = agent
+    has_voi = False
+    h, w = np.shape(city_map)
+    place_index_map = []
+    for i in range(w):
+        place_index_map.append(
+            {
+                'value': math.inf,
+                'visited_cities': [],
+                'current_path': []
+            }
+        )
+    pq = []
+    heappush(pq, (0, start))
+    for i in range(w):
+        if not i == start:
+            heappush(pq, (math.inf, i))
+    while pq:
+        value, place_i = heappop(pq)
+        current_place = place_index_map[place_i]
+
+        if place_i == end:
+            goal = place_index_map[place_i]
+            goal['visited_cities'].append(place_i)
+            return (goal['value'], goal['visited_cities'])
+
+        neighbourhood_vec = city_map[place_i, :]
+        neighbours = np.where(neighbourhood_vec > 0)
+        neighbours = neighbours[0]
+        for j in neighbours:
+            ## THIS IS THE VOI-LOGIC
+            if np.any([vois[c] >= 1 for c in current_place['visited_cities'] + [j]]):
+                n_value = value + city_map[place_i, j]/2
+            else:
+                n_value = value + city_map[place_i, j]
+            path = (place_i, j)
+            place_data = place_index_map[j]
+            if n_value < place_data['value']:
+                if (place_data['value'], j) in pq:
+                    pq.remove((place_data['value'], j))
+                places_visited = current_place['visited_cities'].copy()
+                current_path = current_place['current_path'].copy()
+                current_path.append(path)
+                places_visited.append(place_i)
+                place_data['value'] = n_value
+                place_data['visited_cities'] = places_visited
+                heappush(pq, (place_data['value'], j))
+    print("No Path found")
+    return []
+
 def pathFinding(agent, cityMap, vois, voiUsage):
     (current, start, end) = agent
     G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
@@ -63,8 +116,7 @@ def pathFindingDistances(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDire
         (current, end, start) = agent
         current = end
     
-    G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
-    path = nx.dijkstra_path(G, start, end)
+    (cost,path) = find_path([current,start,end], cityMap,vois)
     
     hasVoi = 0
     for nodeIndex in range(len(path[0: -1])):
