@@ -2,6 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 import networkx as nx
+from heapq import heappush, heappop
+import math
 
 ## --------------- { GLOBALS } --------------- ##
 np.random.seed(12378911)
@@ -69,6 +71,48 @@ def PlotGraph(edges, nodes):
     plt.plot(nodes[:, 0], nodes[:, 1], 'or', markersize=markerSize)
     plt.show()
 
+def find_path(agent,city_map):
+    [current,start,end] = agent
+    has_voi = False
+    h,w = np.shape(city_map)
+    place_index_map = []
+    for i in range (w):
+        place_index_map.append(
+            {
+                'value': math.inf,
+                'visited_cities' : set(),
+                'current_path' : set()
+            }
+        )
+    
+    pq = []
+    heappush(pq,(0,start))
+    while pq:
+        value,place_i = heappop(pq)
+        current_place = place_index_map[place_i]
+
+        if place_i == end:
+            goal = place_index_map[place_i]
+            return goal['current_path']
+
+        neighbourhood_vec = city_map[place_i,:]
+        neighbours = np.where(neighbourhood_vec > 0)
+        for j in neighbours:
+            n_value = value + city_map[place_i,j]
+            path = (place_i,j)
+            place_data = place_index_map[j]
+            if n_value < place_data['value']:
+                if (place_data['value'],j) in pq:
+                    pq.remove(place_cata['value'],j)
+                places_visited = current_place['visited_cities'].copy()
+                current_path = current_place['current_path'].copy()
+                current_path.add(path)
+                places_visited.add(place_i)
+                place_data['value'] = n_value
+                place_data['visited_cities'] = places_visited
+    print("No Path found")
+    return set()
+    ## We have to do something if there is no path
 
 ## --------------- { RUNNING } --------------- ##
 
