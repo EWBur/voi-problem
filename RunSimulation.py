@@ -31,14 +31,14 @@ def PlotGraph(edges, nodes):
 plt.close("all")
 
 #Model parameters
-nCities = 30
-nAgents = 10
+nAgents = 100
 nVois = 3*nCities
-nTimeSteps = 1000
+nTimeSteps = 100
 
 data_set = np.load('MapToUse.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
+nCities = np.size(cityMap,0)
 
 PlotGraph(cityMap, cityPositions)
 

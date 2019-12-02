@@ -9,7 +9,7 @@ import time
 
 ## --------------- { INIT } --------------- ##
 
-def initAgents(nAgents, nNodes):  # AGENTS SHOULD NOT START AND END AT SAME NODE. # Redan fixat? - Jesper
+def initAgents(nAgents, nNodes):
     agents = np.zeros((nAgents, 3), dtype=np.int8)
     for i in range(nAgents):
         cityIndexes = [x for x in range(nNodes)]
@@ -129,6 +129,7 @@ def runSimulation(voiPositions, nNodes, nAgents, cityMap, cityPositions):
     #cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
     #cityMap = buildPaths(cityPositions, 3, nNodes)
     agents = initAgents(nAgents, nNodes)
+    
     voiUsage = 0
     maxVoiUsage = 0
     groupSize = nAgents
