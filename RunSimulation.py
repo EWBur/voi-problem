@@ -1,11 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import TempSim
+import networkx as nx
 #%matplotlib qt
 
-def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions):
-    fitness, maxFitness = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions)
+def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents):
+    fitness, maxFitness = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents)
     return fitness, maxFitness
+
+def initAgents(nAgents, nNodes):
+    agents = np.zeros((nAgents, 3), dtype=np.int8)
+    for i in range(nAgents):
+        cityIndexes = [x for x in range(nNodes)]
+        startCity = np.random.choice(cityIndexes, 1)
+        currentCity = startCity
+        cityIndexes.remove(startCity)
+        endCity = np.random.choice(cityIndexes, 1)
+        agents[i, 0] = currentCity
+        agents[i, 1] = startCity
+        agents[i, 2] = endCity
+    return agents
 
 def PlotGraph(edges, nodes):
     indecesOfEdges = np.where(edges != 0)
@@ -37,9 +51,12 @@ cityPositions = data_set['cityPositions']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = 50
+nAgents = 100
 nVois = 3*nCities
-nTimeSteps = 100
+nTimeSteps = 300
+
+agents = initAgents(nAgents, nCities)
+print(agents)
 
 voiPositions = np.ones(nCities)*nVois/nCities
 
@@ -51,7 +68,7 @@ for iTime in range(nTimeSteps):
         
     #voiPositions = np.ones(nCities)*nVois/nCities
   
-    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions)
+    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents)
     
 print(voiPositions)    
     
@@ -59,5 +76,15 @@ plt.figure()
 plt.plot(fitness,'r')
 plt.plot(maxFitness,'--k')
 
+plt.figure()
+G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
+poss = {}
+for i in range(nCities):
+    poss[i] = cityPositions[i]
+labels = {}
+for i in range(nCities):
+    labels[i] = voiPositions[i]
+#nx.draw_networkx(G,poss)
+nx.draw_networkx(G, poss, labels=labels)
 PlotGraph(cityMap, cityPositions)
 plt.show()

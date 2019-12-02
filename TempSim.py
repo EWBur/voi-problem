@@ -11,20 +11,6 @@ import math
 
 ## --------------- { INIT } --------------- ##
 
-def initAgents(nAgents, nNodes):
-    agents = np.zeros((nAgents, 3), dtype=np.int8)
-    for i in range(nAgents):
-        cityIndexes = [x for x in range(nNodes)]
-        startCity = np.random.choice(cityIndexes, 1)
-        currentCity = startCity
-        cityIndexes.remove(startCity)
-        endCity = np.random.choice(cityIndexes, 1)
-        agents[i, 0] = currentCity
-        agents[i, 1] = startCity
-        agents[i, 2] = endCity
-    return agents
-
-
 def buildPaths(cities, maxDist, nNodes):
     cityMap = np.zeros((nNodes, nNodes))
     for i in range(len(cities)):
@@ -120,7 +106,7 @@ def pathFindingDistances(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDire
     hasVoi = 0
     for nodeIndex in range(len(path[0: -1])):
         currentNode = path[nodeIndex]       #same as c above
-        if vois[currentNode] > 0:
+        if vois[currentNode] > 0 and hasVoi == 0:
             hasVoi = 1
             vois[currentNode] -= 1
             vois[end] += 1
@@ -175,16 +161,15 @@ def PlotGraph(edges, nodes):
 ## --------------- { RUNNING } --------------- ##
 
 
-def runSimulation(voiPositions, nNodes, nAgents, cityMap, cityPositions):
+def runSimulation(voiPositions, nNodes, nAgents, cityMap, cityPositions, agents):
     #np.random.seed(12378911)
-    agents = initAgents(nAgents, nNodes)
     
     voiUsage = 0
     maxVoiUsage = 0
-    groupSize = nAgents
+    groupSize = 1
     
-    nMutations = int(np.round(0*nAgents))
-    agents = MutateAgents(agents,nMutations,nNodes)
+    #nMutations = int(np.round(0*nAgents))
+    #agents = MutateAgents(agents,nMutations,nNodes)
     
     agents = ShuffleAgents(agents,groupSize)
     for a in agents:
