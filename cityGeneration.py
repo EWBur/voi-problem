@@ -53,7 +53,7 @@ maxDist = 0.22
 #cityPositions = np.random.rand(nNodes, 2)
 #cityMap = buildPaths(cityPositions, maxDist, nNodes)
 
-#np.savez('Test3', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions))
+np.savez('MapToUse', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions))
 
 data_set = np.load('Test2.npz')
 cityMap = data_set['cityMap']
