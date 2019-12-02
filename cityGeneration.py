@@ -50,14 +50,12 @@ maxDist = 0.22
 
 #np.random.seed(12378911)
 #cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
-cityPositions = np.random.rand(nNodes, 2)
-cityMap = buildPaths(cityPositions, maxDist, nNodes)
+#cityPositions = np.random.rand(nNodes, 2)
+#cityMap = buildPaths(cityPositions, maxDist, nNodes)
 
-#PlotGraph(cityMap, cityPositions)
+#np.savez('Test3', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions))
 
-np.savez('TestFil', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions))
-
-#data_set = np.load('TestFil.npz')
-#cityMap = data_set['cityMap']
-#cityPositions = data_set['cityPositions']
+data_set = np.load('Test2.npz')
+cityMap = data_set['cityMap']
+cityPositions = data_set['cityPositions']
 PlotGraph(cityMap, cityPositions)

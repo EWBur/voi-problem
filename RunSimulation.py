@@ -13,6 +13,10 @@ nAgents = 10
 nVois = 5*nCities
 nTimeSteps = 100
 
+data_set = np.load('Test2.npz')
+cityMap = data_set['cityMap']
+cityPositions = data_set['cityPositions']
+
 voiPositions = np.ones(nCities)*nVois/nCities
 
 fitness = np.zeros(nTimeSteps)
