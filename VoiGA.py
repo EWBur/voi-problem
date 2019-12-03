@@ -102,7 +102,7 @@ nCities = np.size(cityMap,0)
 
 #Model parameters
 nAgents = 100
-nVois = nCities*2
+nVois = nCities*1
 
 #GA parameters
 noTimeSteps = 100

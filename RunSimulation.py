@@ -21,6 +21,7 @@ def initAgents(nAgents, nNodes):
         agents[i, 2] = endCity
     return agents
 
+'''
 def PlotGraph(edges, nodes):
     indecesOfEdges = np.where(edges != 0)
     fromCityPositions = [nodes[indecesOfEdges[0], 0],
@@ -41,6 +42,7 @@ def PlotGraph(edges, nodes):
              fromCityPositions[1][:], toCityPositions[1][:]], 'k', linewidth=lineWidth)
     plt.plot(nodes[:, 0], nodes[:, 1], 'or', markersize=markerSize)
     plt.show()
+'''
     
 plt.close("all")
 
@@ -52,11 +54,10 @@ nCities = np.size(cityMap,0)
 
 #Model parameters
 nAgents = 100
-nVois = 3*nCities
-nTimeSteps = 300
+nVois = 1*nCities
+nTimeSteps = 100
 
 agents = initAgents(nAgents, nCities)
-print(agents)
 
 voiPositions = np.ones(nCities)*nVois/nCities
 
@@ -66,11 +67,8 @@ for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    #voiPositions = np.ones(nCities)*nVois/nCities
-  
-    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents)
-    
-print(voiPositions)    
+    voiPositions = np.ones(nCities)*nVois/nCities  
+    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents)  
     
 plt.figure()
 plt.plot(fitness,'r')
@@ -86,5 +84,4 @@ for i in range(nCities):
     labels[i] = voiPositions[i]
 #nx.draw_networkx(G,poss)
 nx.draw_networkx(G, poss, labels=labels)
-PlotGraph(cityMap, cityPositions)
 plt.show()

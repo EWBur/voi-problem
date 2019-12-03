@@ -3,14 +3,13 @@ import matplotlib.pyplot as plt
 import random
 import networkx as nx
 from heapq import heappush, heappop
-import time
 import math
 
 ## --------------- { GLOBALS } --------------- ##
 
 
 ## --------------- { INIT } --------------- ##
-
+'''
 def buildPaths(cities, maxDist, nNodes):
     cityMap = np.zeros((nNodes, nNodes))
     for i in range(len(cities)):
@@ -31,7 +30,7 @@ def buildPaths(cities, maxDist, nNodes):
                     cityMap[i, j] = distance
         cityMap[minDistPos[0], minDistPos[1]] = 1
     return cityMap
-
+'''
 
 def find_path(agent, city_map, vois):
     [current, start, end] = agent
@@ -83,6 +82,7 @@ def find_path(agent, city_map, vois):
     print("No Path found")
     return []
 
+'''
 def pathFinding(agent, cityMap, vois, voiUsage):
     (current, start, end) = agent
     G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
@@ -94,6 +94,7 @@ def pathFinding(agent, cityMap, vois, voiUsage):
             vois[end] += 1
             return (path, voiUsage)
     return (path, voiUsage)
+'''
 
 def pathFindingDistances(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDirection):
     (current, start, end) = agent
@@ -133,31 +134,6 @@ def MutateAgents(agents,nMutations,nNodes):
         agents[mutationIndeces[iMutation],randomStartEnd]  = randomNode   
     return agents
 
-
-## --------------- { PLOTTING } --------------- ##
-
-def PlotGraph(edges, nodes):
-    indecesOfEdges = np.where(edges == 1)
-    fromCityPositions = [nodes[indecesOfEdges[0], 0],
-                         nodes[indecesOfEdges[0], 1]]
-    toCityPositions = [nodes[indecesOfEdges[1], 0],
-                       nodes[indecesOfEdges[1], 1]]
-
-    plt.figure()
-    ax = plt.gca().set_aspect('equal', adjustable='box')
-    markerSize = 10
-    fontSize = 30
-    lineWidth = 1
-    plt.xlabel('x', fontsize=fontSize)
-    plt.ylabel('y', fontsize=fontSize)
-    plt.tick_params(axis='both', labelsize=fontSize)
-
-    plt.plot([fromCityPositions[0][:], toCityPositions[0][:]], [
-             fromCityPositions[1][:], toCityPositions[1][:]], 'k', linewidth=lineWidth)
-    plt.plot(nodes[:, 0], nodes[:, 1], 'or', markersize=markerSize)
-    plt.show()
-
-
 ## --------------- { RUNNING } --------------- ##
 
 
@@ -168,8 +144,8 @@ def runSimulation(voiPositions, nNodes, nAgents, cityMap, cityPositions, agents)
     maxVoiUsage = 0
     groupSize = 1
     
-    #nMutations = int(np.round(0*nAgents))
-    #agents = MutateAgents(agents,nMutations,nNodes)
+    nMutations = int(np.round(0.1*nAgents))
+    agents = MutateAgents(agents,nMutations,nNodes)
     
     agents = ShuffleAgents(agents,groupSize)
     for a in agents:
