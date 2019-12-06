@@ -42,44 +42,49 @@ def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
     nx.draw_networkx(G, poss, labels=labels)
     
 def PlotFitness(fitness,maxFitness):
+    fontSize = 20
+    
     plt.figure()
     plt.plot(fitness,'r')
     plt.plot(maxFitness,'--k')
     
+    plt.xlabel('Time',fontsize=fontSize)
+    plt.ylabel('Scooter usage',fontsize=fontSize)
+    plt.legend(['Actual usage','Maximum usage'],fontsize=fontSize,frameon=False)
+    plt.tick_params(axis='both', labelsize=fontSize)
+    plt.title('Scooter usage',fontsize=fontSize)
+    
     plt.figure()
     plt.plot(maxFitness-fitness,'k')
     
+    plt.xlabel('Time',fontsize=fontSize)
+    plt.ylabel('Voi usage',fontsize=fontSize)
+    plt.tick_params(axis='both', labelsize=fontSize)
+    plt.title('Difference of maximum voi usage and actual voi usage',fontsize=fontSize)
+    
 def PlotVoiDistanceFromCenter(voiDistanceFromCenter):
+    fontSize = 20
+    
     plt.figure()
     plt.plot(voiDistanceFromCenter,'k')
     
+    plt.xlabel('Time',fontsize=fontSize)
+    plt.ylabel('Mean distance',fontsize=fontSize)
+    plt.tick_params(axis='both', labelsize=fontSize)
+    plt.title('The scooters mean distance from the networks center',fontsize=fontSize)
+    
 def PlotAgentsStartEndDistribution(agents,nNodes):
+    fontSize = 20
+    
     plt.figure()
     plt.hist(agents[:,1],nNodes,fc=(0, 0, 1, 0.5))
     plt.hist(agents[:,2],nNodes,fc=(1, 0, 0, 0.5))
-
-'''
-def PlotGraph(edges, nodes):
-    indecesOfEdges = np.where(edges != 0)
-    fromCityPositions = [nodes[indecesOfEdges[0], 0],
-                         nodes[indecesOfEdges[0], 1]]
-    toCityPositions = [nodes[indecesOfEdges[1], 0],
-                       nodes[indecesOfEdges[1], 1]]
-
-    plt.figure()
-    ax = plt.gca().set_aspect('equal', adjustable='box')
-    markerSize = 10
-    fontSize = 30
-    lineWidth = 1
-    plt.xlabel('x', fontsize=fontSize)
-    plt.ylabel('y', fontsize=fontSize)
+    
+    plt.xlabel('Node index',fontsize=fontSize)
+    plt.ylabel('Number of agents',fontsize=fontSize)
+    plt.legend(['Start node','End node'],fontsize=fontSize,frameon=False)
     plt.tick_params(axis='both', labelsize=fontSize)
-
-    plt.plot([fromCityPositions[0][:], toCityPositions[0][:]], [
-             fromCityPositions[1][:], toCityPositions[1][:]], 'k', linewidth=lineWidth)
-    plt.plot(nodes[:, 0], nodes[:, 1], 'or', markersize=markerSize)
-    plt.show()
-'''
+    plt.title('Distribution of agents start and end',fontsize=fontSize)
     
 plt.close("all")
 
@@ -96,7 +101,7 @@ networkCenter = FindGraphCenter(cityPositions)
 #Model parameters
 nAgents = 100
 nVois = 2*nCities
-nTimeSteps = 100
+nTimeSteps = 5
 nGroups = nAgents
 mutationProbabilityAgents = 0
 
@@ -128,5 +133,4 @@ for iTime in range(nTimeSteps):
 PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
-PlotAgentsStartEndDistribution(agents,nCities)
 plt.show()
