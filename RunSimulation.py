@@ -52,6 +52,11 @@ def PlotFitness(fitness,maxFitness):
 def PlotVoiDistanceFromCenter(voiDistanceFromCenter):
     plt.figure()
     plt.plot(voiDistanceFromCenter,'k')
+    
+def PlotAgentsStartEndDistribution(agents,nNodes):
+    plt.figure()
+    plt.hist(agents[:,1],nNodes,fc=(0, 0, 1, 0.5))
+    plt.hist(agents[:,2],nNodes,fc=(1, 0, 0, 0.5))
 
 '''
 def PlotGraph(edges, nodes):
@@ -106,6 +111,8 @@ fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
 voiDistanceFromCenter = np.zeros(nTimeSteps)
 
+PlotAgentsStartEndDistribution(agents,nCities)
+
 for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
@@ -121,4 +128,5 @@ for iTime in range(nTimeSteps):
 PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
+PlotAgentsStartEndDistribution(agents,nCities)
 plt.show()
