@@ -43,19 +43,34 @@ def PlotGraph(edges, nodes):
     plt.plot(nodes[:, 0], nodes[:, 1], 'or', markersize=markerSize)
     plt.show()
     
+def initAgents(nAgents, nNodes):
+    agents = np.zeros((nAgents, 3), dtype=np.int8)
+    for i in range(nAgents):
+        cityIndexes = [x for x in range(nNodes)]
+        startCity = np.random.choice(cityIndexes, 1)
+        currentCity = startCity
+        cityIndexes.remove(startCity)
+        endCity = np.random.choice(cityIndexes, 1)
+        agents[i, 0] = currentCity
+        agents[i, 1] = startCity
+        agents[i, 2] = endCity
+    return agents
+    
 plt.close("all")
 
 nNodes = 30
 maxDist = 0.22
+nAgents = 5000
 
 #np.random.seed(12378911)
 #cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
 #cityPositions = np.random.rand(nNodes, 2)
 #cityMap = buildPaths(cityPositions, maxDist, nNodes)
+#uniformAgents = initAgents(nAgents, nNodes)
 
-np.savez('MapToUse', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions))
+np.savez('MapToUseNew', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), uniformAgents = uniformAgents)
 
-data_set = np.load('Test2.npz')
-cityMap = data_set['cityMap']
-cityPositions = data_set['cityPositions']
-PlotGraph(cityMap, cityPositions)
+#data_set = np.load('Test2.npz')
+#cityMap = data_set['cityMap']
+#cityPositions = data_set['cityPositions']
+#PlotGraph(cityMap, cityPositions)

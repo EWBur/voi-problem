@@ -4,8 +4,8 @@ import TempSim
 import networkx as nx
 #%matplotlib qt
 
-def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents):
-    fitness, maxFitness = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents)
+def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents):
+    fitness, maxFitness = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
     return fitness, maxFitness
 
 def initAgents(nAgents, nNodes):
@@ -28,6 +28,30 @@ def FindGraphCenter(nodePositions):
 def VoiDistanceFromCenter(nodePositions,voiPositions,networkCenter):
     voiDistanceFromCenter = np.matmul(voiPositions,np.sqrt(np.sum((nodePositions-networkCenter)**2,1)))/np.sum(voiPositions)
     return voiDistanceFromCenter
+
+def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
+    plt.figure()
+    G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
+    poss = {}
+    for i in range(nCities):
+        poss[i] = cityPositions[i]
+    labels = {}
+    for i in range(nCities):
+        labels[i] = voiPositions[i]
+    #nx.draw_networkx(G,poss)
+    nx.draw_networkx(G, poss, labels=labels)
+    
+def PlotFitness(fitness,maxFitness):
+    plt.figure()
+    plt.plot(fitness,'r')
+    plt.plot(maxFitness,'--k')
+    
+    plt.figure()
+    plt.plot(maxFitness-fitness,'k')
+    
+def PlotVoiDistanceFromCenter(voiDistanceFromCenter):
+    plt.figure()
+    plt.plot(voiDistanceFromCenter,'k')
 
 '''
 def PlotGraph(edges, nodes):
@@ -54,50 +78,47 @@ def PlotGraph(edges, nodes):
     
 plt.close("all")
 
-#Import map to use
-data_set = np.load('MapToUse.npz')
+#Import map to use and agents
+data_set = np.load('MapToUseNew.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
+uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
+#Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
 nAgents = 100
 nVois = 2*nCities
-nTimeSteps = 1000
+nTimeSteps = 100
+nGroups = nAgents
+mutationProbabilityAgents = 0
 
-agents = initAgents(nAgents, nCities)
+#Load agents
+agents = np.zeros((nAgents,3),int)
+agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 
+#Initial voi distribution (uniform)
 voiPositions = np.ones(nCities)*nVois/nCities
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
 voiDistanceFromCenter = np.zeros(nTimeSteps)
+
 for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    #voiPositions = np.ones(nCities)*nVois/nCities  
-    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents)  
+    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+     
+    agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
+    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)  
     
     voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,voiPositions,networkCenter)
-    
-plt.figure()
-plt.plot(fitness,'r')
-plt.plot(maxFitness,'--k')
 
-plt.figure()
-plt.plot(voiDistanceFromCenter,'k')
-
-plt.figure()
-G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
-poss = {}
-for i in range(nCities):
-    poss[i] = cityPositions[i]
-labels = {}
-for i in range(nCities):
-    labels[i] = voiPositions[i]
-#nx.draw_networkx(G,poss)
-nx.draw_networkx(G, poss, labels=labels)
+#Plots
+PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
+PlotFitness(fitness,maxFitness)
+PlotVoiDistanceFromCenter(voiDistanceFromCenter)
 plt.show()

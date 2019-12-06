@@ -4,6 +4,7 @@ import random
 import networkx as nx
 from heapq import heappush, heappop
 import math
+#np.random.seed(12378911)
 
 ## --------------- { GLOBALS } --------------- ##
 
@@ -137,22 +138,21 @@ def MutateAgents(agents,nMutations,nNodes):
 ## --------------- { RUNNING } --------------- ##
 
 
-def runSimulation(voiPositions, nNodes, nAgents, cityMap, cityPositions, agents):
-    #np.random.seed(12378911)
-    
+def runSimulation(voiPositions, nNodes, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents):
     voiUsage = 0
     maxVoiUsage = 0
-    groupSize = 1
     
-    nMutations = int(np.round(0.1*nAgents))
+    #Mutate agents start/end node
+    nMutations = int(np.round(mutationProbabilityAgents*nAgents))
     agents = MutateAgents(agents,nMutations,nNodes)
     
-    agents = ShuffleAgents(agents,groupSize)
+    #Go forward direction (start -> end)
+    agents = ShuffleAgents(agents,nGroups)
     for a in agents:
         (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)
         
     #Go reverse direction (end -> start)
-    agents = ShuffleAgents(agents,groupSize)
+    agents = ShuffleAgents(agents,nGroups)
     for a in agents:
         (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)   
     
