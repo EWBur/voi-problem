@@ -8,6 +8,7 @@ def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,a
     fitness, maxFitness = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
     return fitness, maxFitness
 
+'''
 def initAgents(nAgents, nNodes):
     agents = np.zeros((nAgents, 3), dtype=np.int8)
     for i in range(nAgents):
@@ -20,6 +21,7 @@ def initAgents(nAgents, nNodes):
         agents[i, 1] = startCity
         agents[i, 2] = endCity
     return agents
+'''
 
 def FindGraphCenter(nodePositions):
     networkCenter = np.sum(nodePositions,0)/np.size(nodePositions,0)
