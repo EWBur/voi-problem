@@ -21,6 +21,14 @@ def initAgents(nAgents, nNodes):
         agents[i, 2] = endCity
     return agents
 
+def FindGraphCenter(nodePositions):
+    networkCenter = np.sum(nodePositions,0)/np.size(nodePositions,0)
+    return networkCenter
+
+def VoiDistanceFromCenter(nodePositions,voiPositions,networkCenter):
+    voiDistanceFromCenter = np.matmul(voiPositions,np.sqrt(np.sum((nodePositions-networkCenter)**2,1)))/np.sum(voiPositions)
+    return voiDistanceFromCenter
+
 '''
 def PlotGraph(edges, nodes):
     indecesOfEdges = np.where(edges != 0)
@@ -52,10 +60,12 @@ cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
 nCities = np.size(cityMap,0)
 
+networkCenter = FindGraphCenter(cityPositions)
+
 #Model parameters
 nAgents = 100
-nVois = 1*nCities
-nTimeSteps = 100
+nVois = 2*nCities
+nTimeSteps = 1000
 
 agents = initAgents(nAgents, nCities)
 
@@ -63,16 +73,22 @@ voiPositions = np.ones(nCities)*nVois/nCities
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
+voiDistanceFromCenter = np.zeros(nTimeSteps)
 for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    voiPositions = np.ones(nCities)*nVois/nCities  
+    #voiPositions = np.ones(nCities)*nVois/nCities  
     fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents)  
+    
+    voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,voiPositions,networkCenter)
     
 plt.figure()
 plt.plot(fitness,'r')
 plt.plot(maxFitness,'--k')
+
+plt.figure()
+plt.plot(voiDistanceFromCenter,'k')
 
 plt.figure()
 G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
