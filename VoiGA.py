@@ -114,6 +114,7 @@ mutationProbability = 1/nCities
 creepRate = 0.1
 elitismNumber = 1
 zeroThreshold = 0
+bestPositionsSaveName = 'BestVoiPositionsTest'
 
 population = InitializePopulation(nCities, populationSize)
 
@@ -152,6 +153,8 @@ for iTime in range(noTimeSteps):
 
     newPopulation[0:elitismNumber, :] = bestChromosome
     population = newPopulation
+
+np.savez(bestPositionsSaveName, bestPositions = np.array(decodedPopulation[0,:]),greatestFitness = np.array(greatestFitness))
 
 print(decodedPopulation[0, :])
 PlotFitness(noTimeSteps, greatestFitness)
