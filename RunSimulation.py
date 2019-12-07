@@ -33,15 +33,17 @@ def VoiDistanceFromCenter(nodePositions,voiPositions,networkCenter):
 
 def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
     plt.figure()
-    G = nx.from_numpy_matrix(cityMap, create_using=nx.DiGraph())
+    G = nx.from_numpy_matrix(cityMap)
+    indices = {}
     poss = {}
     for i in range(nCities):
         poss[i] = cityPositions[i]
+        indices[i] = i
     labels = {}
     for i in range(nCities):
         labels[i] = voiPositions[i]
     #nx.draw_networkx(G,poss)
-    nx.draw_networkx(G, poss, labels=labels)
+    nx.draw(G, poss, labels=indices)
     
 def PlotFitness(fitness,maxFitness):
     fontSize = 20
@@ -90,6 +92,16 @@ def PlotAgentsStartEndDistribution(agents,nNodes):
     
 plt.close("all")
 
+def PlotAverageVoisPerNode(voisPerNode):
+    fontSize = 20
+    avgVois = np.average(voisPerNode, axis=1)
+    plt.figure()
+    plt.bar([x for x in range(len(avgVois))],height=avgVois)
+    plt.xlabel('Node index',fontsize=fontSize)
+    plt.ylabel('Avg. number of vois',fontsize=fontSize)
+    plt.title('Average number of vois per node',fontsize=fontSize)
+
+
 #Import map to use and agents
 data_set = np.load('MapToUseNew.npz')
 cityMap = data_set['cityMap']
@@ -101,9 +113,9 @@ nCities = np.size(cityMap,0)
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 100
-nVois = 2*nCities
-nTimeSteps = 5
+nAgents = 500
+nVois = 7*nCities
+nTimeSteps = 20
 nGroups = nAgents
 mutationProbabilityAgents = 0
 
@@ -117,6 +129,7 @@ voiPositions = np.ones(nCities)*nVois/nCities
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
 voiDistanceFromCenter = np.zeros(nTimeSteps)
+voisPerNode = np.zeros((nCities, nTimeSteps))
 
 PlotAgentsStartEndDistribution(agents,nCities)
 
@@ -127,12 +140,14 @@ for iTime in range(nTimeSteps):
     #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
      
     agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
-    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)  
-    
+    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
+    voisPerNode[:,iTime] = voiPositions
+    print(voiPositions)
     voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,voiPositions,networkCenter)
 
 #Plots
 PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
+PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
 plt.show()
