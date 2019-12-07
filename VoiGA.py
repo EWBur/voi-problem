@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import TempSim
 #%matplotlib qt
 import time
-import networkx as nx
+#import networkx as nx
 
 def InitializePopulation(nCities, populationSize):
     population = np.random.rand(populationSize, nCities)
@@ -191,5 +191,5 @@ np.savez(bestPositionsSaveName, bestPositions = np.array(decodedPopulation[0,:])
 
 print(decodedPopulation[0, :])
 PlotFitness(nGenerations, greatestFitness)
-PlotGraphAndVois(cityMap,nCities,decodedPopulation[0,:],cityPositions)
+#PlotGraphAndVois(cityMap,nCities,decodedPopulation[0,:],cityPositions)
 plt.show()
