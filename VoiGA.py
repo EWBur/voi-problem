@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import TempSim
 #%matplotlib qt
 import time
+import networkx as nx
 
 def InitializePopulation(nCities, populationSize):
     population = np.random.rand(populationSize, nCities)
@@ -31,14 +32,15 @@ def DecodePopulation(nVois, population, zeroThreshold):
     return decodedPopulation
 
 
-def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositions, nRepetitions):
+def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositions, nRepetitions, agents, nGroups,mutationProbabilityAgents,uniformAgents):
     nIndividuals = np.size(decodedPopulation, 0)
     populationFitness = np.zeros(nIndividuals)
     maxPopulationFitness = np.zeros(nIndividuals)
     
     for vv in range(nIndividuals):
         for iRepetition in range(nRepetitions):
-            tempFitness, tempMaxPopulation = TempSim.runSimulation(decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions)
+            agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
+            tempFitness, tempMaxPopulation = TempSim.runSimulation(decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
         
         populationFitness[vv] += tempFitness/nRepetitions
         maxPopulationFitness[vv] += tempMaxPopulation/nRepetitions
@@ -83,29 +85,51 @@ def Mutation(chromosome, mutationProbability, creepRate):
     return chromosome
 
 
-def PlotFitness(noTimeSteps, greatestFitness):
+def PlotFitness(noTimeSteps,greatestFitness):
     plt.figure()
-    plt.plot(np.linspace(0, noTimeSteps, noTimeSteps+1), greatestFitness, 'k')
+    plt.plot(np.linspace(0, noTimeSteps, noTimeSteps), greatestFitness[1:len(greatestFitness)], 'k')
 
-    fontSize = 15
+    fontSize = 20
     plt.xlabel('Time', fontsize=fontSize)
     plt.ylabel('Greatest fitness', fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
+    plt.title('Greatest fitness of population',fontsize=fontSize)
     plt.show()
+    
+def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
+    fontSize = 20
+    plt.figure()
+    G = nx.from_numpy_matrix(cityMap)
+    indices = {}
+    poss = {}
+    for i in range(nCities):
+        poss[i] = cityPositions[i]
+        indices[i] = i
+    labels = {}
+    for i in range(nCities):
+        labels[i] = int(voiPositions[i])
+    nx.draw(G, poss, labels=labels)
+    plt.title('Optimal scooter positions',fontsize=fontSize)
+    
 
 plt.close("all")
 
-data_set = np.load('MapToUse.npz')
+data_set = np.load('MapToUseNew.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
+uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
 nAgents = 100
 nVois = nCities*1
 
+#Simulation parameters
+mutationProbabilityAgents = 0
+nGroups = nAgents
+
 #GA parameters
-noTimeSteps = 100
+nGenerations = 10
 nRepetitions = 1
 populationSize = 30
 tournamentSize = 2
@@ -116,23 +140,31 @@ elitismNumber = 1
 zeroThreshold = 0
 bestPositionsSaveName = 'BestVoiPositionsTest'
 
+agents = np.zeros((nAgents,3),int)
+agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
+
 population = InitializePopulation(nCities, populationSize)
 
-greatestFitness = np.zeros(noTimeSteps+1)
-for iTime in range(noTimeSteps):
-    if np.mod(iTime+1, noTimeSteps/10) == 0:
-        print('Progress: ' + str((iTime+1)/noTimeSteps*100) + ' %')
+greatestFitness = np.zeros(nGenerations+1)
+maxGreatestFitness = np.zeros(nGenerations+1)
+for iTime in range(nGenerations):
+    if np.mod(iTime+1, nGenerations/10) == 0:
+        print('Progress: ' + str((iTime+1)/nGenerations*100) + ' %')
 
     decodedPopulation = DecodePopulation(nVois, population, zeroThreshold)
     populationFitness, maxPopulationFitness = FitnessOfPopulation(
-        decodedPopulation, nCities, nAgents, cityMap, cityPositions,nRepetitions)
+        decodedPopulation, nCities, nAgents, cityMap, cityPositions,nRepetitions, agents, nGroups, mutationProbabilityAgents,uniformAgents)
 
+    relativePopulationFitness = np.divide(populationFitness,maxPopulationFitness)
+    populationFitness = relativePopulationFitness
     generationGreatestFitness = np.max(populationFitness)
     if generationGreatestFitness > greatestFitness[iTime]:
         greatestFitness[iTime+1] = generationGreatestFitness
+        maxGreatestFitness[iTime+1] = maxPopulationFitness[np.argmax(populationFitness)]
         bestChromosome = population[np.argmax(populationFitness), :]
     else:
         greatestFitness[iTime+1] = greatestFitness[iTime]
+        maxGreatestFitness[iTime+1] = maxGreatestFitness[iTime]
 
     newPopulation = np.zeros((populationSize, nCities))
     for jChromosomePair in range(int(populationSize/2)):
@@ -154,8 +186,10 @@ for iTime in range(noTimeSteps):
     newPopulation[0:elitismNumber, :] = bestChromosome
     population = newPopulation
 
+decodedPopulation = DecodePopulation(nVois, population, zeroThreshold)
 np.savez(bestPositionsSaveName, bestPositions = np.array(decodedPopulation[0,:]),greatestFitness = np.array(greatestFitness))
 
 print(decodedPopulation[0, :])
-PlotFitness(noTimeSteps, greatestFitness)
+PlotFitness(nGenerations, greatestFitness)
+PlotGraphAndVois(cityMap,nCities,decodedPopulation[0,:],cityPositions)
 plt.show()
