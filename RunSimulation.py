@@ -121,6 +121,17 @@ def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
         labels[i] = int(voiPositions[i])
     nx.draw(G, poss, labels=labels)
     plt.title('Scooter positions',fontsize=fontSize)
+    
+def PlotGreatestFitness(nGenerations,greatestFitness):
+    plt.figure()
+    plt.plot(np.linspace(0, nGenerations, nGenerations), greatestFitness[1:len(greatestFitness)], 'k')
+
+    fontSize = 20
+    plt.xlabel('Generations', fontsize=fontSize)
+    plt.ylabel('Greatest fitness', fontsize=fontSize)
+    plt.tick_params(axis='both', labelsize=fontSize)
+    plt.title('Greatest fitness of population',fontsize=fontSize)
+    plt.show()
 
 
 #Import map to use and agents
@@ -132,7 +143,6 @@ nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
 voiPositionData = np.load('BestVoiPositions_100_1_0_nAgents_New.npz')
-optimizedVoiPositions = voiPositionData['bestPositions']
 
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
@@ -150,7 +160,7 @@ agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 
 #Initial voi distribution
 voiPositions = np.ones(nCities)*nVois/nCities    ### UNIFORM VOI POSITIONS
-#voiPositions = optimizedVoiPositions            ### OPTIMIZED VOI POSITIONS
+#voiPositions = voiPositionData['bestPositions']            ### OPTIMIZED VOI POSITIONS
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
@@ -174,10 +184,15 @@ for iTime in range(nTimeSteps):
 
     voiPositions = newVoiPositions
 
+#Load data for GA fitness plot
+#nGenerations = voiPositionData['nGenerations']
+greatestFitness = voiPositionData['greatestFitness']
+
 #Plots
 PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)
 PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
-PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
+PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions)
+PlotGreatestFitness(3000, greatestFitness)
 plt.show()

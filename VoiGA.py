@@ -150,7 +150,7 @@ agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 population = InitializePopulation(nCities, populationSize)
 
 greatestFitness = np.zeros(nGenerations+1)
-maxGreatestFitness = np.zeros(nGenerations+1)
+#maxGreatestFitness = np.zeros(nGenerations+1)
 
 #Run GA
 for iTime in range(nGenerations):
@@ -163,16 +163,15 @@ for iTime in range(nGenerations):
         decodedPopulation, nCities, nAgents, cityMap, cityPositions,nRepetitions, agents, nGroups, mutationProbabilityAgents)
     
     #Save data of greatest chromosome
-    relativePopulationFitness = np.divide(populationFitness,maxPopulationFitness)
-    populationFitness = relativePopulationFitness
+    populationFitness = np.divide(populationFitness,maxPopulationFitness)
     generationGreatestFitness = np.max(populationFitness)
     if generationGreatestFitness > greatestFitness[iTime]:
         greatestFitness[iTime+1] = generationGreatestFitness
-        maxGreatestFitness[iTime+1] = maxPopulationFitness[np.argmax(populationFitness)]
+        #maxGreatestFitness[iTime+1] = maxPopulationFitness[np.argmax(populationFitness)]
         bestChromosome = population[np.argmax(populationFitness), :]
     else:
         greatestFitness[iTime+1] = greatestFitness[iTime]
-        maxGreatestFitness[iTime+1] = maxGreatestFitness[iTime]
+        #maxGreatestFitness[iTime+1] = maxGreatestFitness[iTime]
     
     #Generate new population
     newPopulation = np.zeros((populationSize, nCities))
@@ -203,7 +202,7 @@ endTime = time.time()
 runTime = endTime - startTime
 print('Runtime: ' + str(runTime) + ' s')
 
-np.savez(bestPositionsSaveName, bestPositions = np.array(decodedPopulation[0,:]),greatestFitness = np.array(greatestFitness))
+np.savez(bestPositionsSaveName, bestPositions = np.array(decodedPopulation[0,:]),greatestFitness = np.array(greatestFitness),nGenerations = np.array(nGenerations))
 
 #Plots
 PlotFitness(nGenerations, greatestFitness)
