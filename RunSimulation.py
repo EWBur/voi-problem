@@ -31,7 +31,7 @@ def VoiDistanceFromCenter(nodePositions,voiPositions,networkCenter):
     voiDistanceFromCenter = np.matmul(voiPositions,np.sqrt(np.sum((nodePositions-networkCenter)**2,1)))/np.sum(voiPositions)
     return voiDistanceFromCenter
 
-def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
+def PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions):
     fontSize = 20
     plt.figure()
     G = nx.from_numpy_matrix(cityMap)
@@ -142,7 +142,7 @@ nAgents = 100
 nVois = 1*nCities
 nTimeSteps = 100
 nGroups = nAgents
-mutationProbabilityAgents = 0.05
+mutationProbabilityAgents = 0
 
 #Load agents
 agents = np.zeros((nAgents,3),int)
@@ -163,7 +163,7 @@ for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+    voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
     #voiPositions[:] = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
     
     #Run simulation
@@ -173,9 +173,9 @@ for iTime in range(nTimeSteps):
     voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,newVoiPositions,networkCenter)
 
     voiPositions = newVoiPositions
- 
+
 #Plots
-PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
+PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)
 PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)

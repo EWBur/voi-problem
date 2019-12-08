@@ -15,6 +15,7 @@ def DecodePopulation(nVois, population, zeroThreshold):
 
     populationCopy = np.zeros((np.size(population, 0), np.size(population, 1)))
     populationCopy[:, :] = population[:, :]
+    
     populationCopy[populationCopy < zeroThreshold] = 0
 
     decodedPopulation = np.floor(
@@ -32,15 +33,14 @@ def DecodePopulation(nVois, population, zeroThreshold):
     return decodedPopulation
 
 
-def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositions, nRepetitions, agents, nGroups,mutationProbabilityAgents,uniformAgents):
+def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositions, nRepetitions, agents, nGroups,mutationProbabilityAgents):
     nIndividuals = np.size(decodedPopulation, 0)
     populationFitness = np.zeros(nIndividuals)
     maxPopulationFitness = np.zeros(nIndividuals)
     
     for vv in range(nIndividuals):
         for iRepetition in range(nRepetitions):
-            agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
-            tempFitness, tempMaxPopulation = TempSim.runSimulation(decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
+            tempFitness, tempMaxPopulation, newVoiPositions = TempSim.runSimulation(decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
         
         populationFitness[vv] += tempFitness/nRepetitions
         maxPopulationFitness[vv] += tempMaxPopulation/nRepetitions
@@ -115,6 +115,7 @@ def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
 plt.close("all")
 startTime = time.time()
 
+#Load city data
 data_set = np.load('MapToUseNew.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
@@ -130,7 +131,7 @@ mutationProbabilityAgents = 0
 nGroups = nAgents
 
 #GA parameters
-nGenerations = 3000
+nGenerations = 100
 nRepetitions = 1
 populationSize = 30
 tournamentSize = 2
@@ -141,21 +142,27 @@ elitismNumber = 1
 zeroThreshold = 0
 bestPositionsSaveName = 'Test'
 
+#Initialize agents
 agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 
+#Initialize GA population
 population = InitializePopulation(nCities, populationSize)
 
 greatestFitness = np.zeros(nGenerations+1)
 maxGreatestFitness = np.zeros(nGenerations+1)
+
+#Run GA
 for iTime in range(nGenerations):
     if np.mod(iTime+1, nGenerations/10) == 0:
         print('Progress: ' + str((iTime+1)/nGenerations*100) + ' %')
-
+    
+    #Decode population to voi positions and run through simulation
     decodedPopulation = DecodePopulation(nVois, population, zeroThreshold)
     populationFitness, maxPopulationFitness = FitnessOfPopulation(
-        decodedPopulation, nCities, nAgents, cityMap, cityPositions,nRepetitions, agents, nGroups, mutationProbabilityAgents,uniformAgents)
-
+        decodedPopulation, nCities, nAgents, cityMap, cityPositions,nRepetitions, agents, nGroups, mutationProbabilityAgents)
+    
+    #Save data of greatest chromosome
     relativePopulationFitness = np.divide(populationFitness,maxPopulationFitness)
     populationFitness = relativePopulationFitness
     generationGreatestFitness = np.max(populationFitness)
@@ -166,24 +173,29 @@ for iTime in range(nGenerations):
     else:
         greatestFitness[iTime+1] = greatestFitness[iTime]
         maxGreatestFitness[iTime+1] = maxGreatestFitness[iTime]
-
+    
+    #Generate new population
     newPopulation = np.zeros((populationSize, nCities))
     for jChromosomePair in range(int(populationSize/2)):
+        #Tournament selection
         chosenIndex1 = TournamentSelection(
             populationFitness, tournamentSize, tournamentProbability)
         chosenIndex2 = TournamentSelection(
             populationFitness, tournamentSize, tournamentProbability)
         chromosome1 = population[chosenIndex1, :]
         chromosome2 = population[chosenIndex2, :]
-
+        
+        #Crossover
         chromosome1, chromosome2 = Crossover(chromosome1, chromosome2)
 
+        #Mutations
         chromosome1 = Mutation(chromosome1, mutationProbability, creepRate)
         chromosome2 = Mutation(chromosome2, mutationProbability, creepRate)
-
+        
         newPopulation[2*jChromosomePair, :] = chromosome1
         newPopulation[2*jChromosomePair+1, :] = chromosome2
-
+    
+    #Elitism
     newPopulation[0:elitismNumber, :] = bestChromosome
     population = newPopulation
     
@@ -191,9 +203,9 @@ endTime = time.time()
 runTime = endTime - startTime
 print('Runtime: ' + str(runTime) + ' s')
 
-decodedPopulation = DecodePopulation(nVois, population, zeroThreshold)
 np.savez(bestPositionsSaveName, bestPositions = np.array(decodedPopulation[0,:]),greatestFitness = np.array(greatestFitness))
 
+#Plots
 PlotFitness(nGenerations, greatestFitness)
 PlotGraphAndVois(cityMap,nCities,decodedPopulation[0,:],cityPositions)
 plt.show()

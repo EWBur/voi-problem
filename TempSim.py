@@ -156,7 +156,7 @@ def runSimulation(voiPositionsInit, nNodes, nAgents, cityMap, cityPositions, age
     agents = ShuffleAgents(agents,nGroups)
     for a in agents:
         (path, voiUsage, maxVoiUsage, voiPositions) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)  
-        
+    
     #Go reverse direction (end -> start)
     agents = ShuffleAgents(agents,nGroups)
     for a in agents:
