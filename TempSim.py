@@ -1,7 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import random
-#import networkx as nx
 from heapq import heappush, heappop
 import math
 #np.random.seed(12378911)
