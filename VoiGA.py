@@ -9,7 +9,7 @@ def InitializePopulation(nCities, populationSize):
     population = np.random.rand(populationSize, nCities)
     return population
 
-
+'''
 def DecodePopulation(nVois, population, zeroThreshold):
     nCities = np.size(population, 1)
 
@@ -29,6 +29,28 @@ def DecodePopulation(nVois, population, zeroThreshold):
                 0, nCities)] += np.sign(nVois-nVoisInCity)
             decodedPopulation = np.maximum(decodedPopulation, 0)
             nVoisInCity = np.sum(decodedPopulation, 1)[i]
+
+    return decodedPopulation
+'''
+
+def DecodePopulationNew(nVois, population, zeroThreshold):
+    nCities = np.size(population, 1)
+
+    populationCopy = np.zeros((np.size(population, 0), np.size(population, 1)))
+    populationCopy[:, :] = population[:, :]
+    
+    populationCopy[populationCopy < zeroThreshold] = 0
+
+    normedPopulation = population/(np.tile(np.sum(population, 1), (nCities, 1))).T*nVois
+    decodedPopulationMissing = np.floor(population/(np.tile(np.sum(population, 1), (nCities, 1))).T*nVois)
+    
+    populationLeftSorted = np.argsort(-(normedPopulation - decodedPopulationMissing))
+    
+    for iChromosome in range(populationSize):
+        nVoisInCity = np.sum(decodedPopulationMissing, 1)[iChromosome]
+        nMissing = int(nVois - nVoisInCity)    
+        decodedPopulationMissing[iChromosome,populationLeftSorted[iChromosome,0:nMissing]] += 1
+    decodedPopulation = decodedPopulationMissing
 
     return decodedPopulation
 
@@ -123,7 +145,7 @@ uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = 100
+nAgents = 200
 nVois = nCities*1
 
 #Simulation parameters
@@ -131,13 +153,14 @@ mutationProbabilityAgents = 0
 nGroups = nAgents
 
 #GA parameters
-nGenerations = 10
+nGenerations = 2
 nRepetitions = 1
 populationSize = 30
 tournamentSize = 2
 tournamentProbability = 0.7
-mutationProbability = 3/nCities
-creepRate = 0.1
+mutationProbability = 5/nCities
+crossoverProbability = 0.7
+creepRate = 0.2
 elitismNumber = 1
 zeroThreshold = 0
 bestPositionsSaveName = 'Test'
@@ -158,7 +181,7 @@ for iTime in range(nGenerations):
         print('Progress: ' + str((iTime+1)/nGenerations*100) + ' %')
     
     #Decode population to voi positions and run through simulation
-    decodedPopulation = DecodePopulation(nVois, population, zeroThreshold)
+    decodedPopulation = DecodePopulationNew(nVois, population, zeroThreshold)
     populationFitness, maxPopulationFitness = FitnessOfPopulation(
         decodedPopulation, nCities, nAgents, cityMap, cityPositions,nRepetitions, agents, nGroups, mutationProbabilityAgents)
     
@@ -186,7 +209,9 @@ for iTime in range(nGenerations):
         chromosome2 = population[chosenIndex2, :]
         
         #Crossover
-        chromosome1, chromosome2 = Crossover(chromosome1, chromosome2)
+        rCrossover = np.random.rand()
+        if rCrossover < crossoverProbability:
+            chromosome1, chromosome2 = Crossover(chromosome1, chromosome2)
 
         #Mutations
         chromosome1 = Mutation(chromosome1, mutationProbability, creepRate)

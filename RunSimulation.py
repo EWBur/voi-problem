@@ -148,9 +148,9 @@ voiPositionData = np.load('Test.npz')
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 100
-nVois = 1*nCities
-nTimeSteps = 100
+nAgents = 200
+nVois = 2*nCities
+nTimeSteps = 2
 nGroups = nAgents
 mutationProbabilityAgents = 0
 
@@ -159,8 +159,8 @@ agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 
 #Initial voi distribution
-voiPositions = np.ones(nCities)*nVois/nCities    ### UNIFORM VOI POSITIONS
-#voiPositions = voiPositionData['bestPositions']            ### OPTIMIZED VOI POSITIONS
+voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
+#voiPositions = voiPositionData['bestPositions']        ### OPTIMIZED VOI POSITIONS
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
