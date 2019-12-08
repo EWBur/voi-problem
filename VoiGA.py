@@ -131,7 +131,7 @@ mutationProbabilityAgents = 0
 nGroups = nAgents
 
 #GA parameters
-nGenerations = 100
+nGenerations = 10
 nRepetitions = 1
 populationSize = 30
 tournamentSize = 2
@@ -169,6 +169,7 @@ for iTime in range(nGenerations):
         greatestFitness[iTime+1] = generationGreatestFitness
         #maxGreatestFitness[iTime+1] = maxPopulationFitness[np.argmax(populationFitness)]
         bestChromosome = population[np.argmax(populationFitness), :]
+        bestDecodedChromosome = decodedPopulation[np.argmax(populationFitness), :]
     else:
         greatestFitness[iTime+1] = greatestFitness[iTime]
         #maxGreatestFitness[iTime+1] = maxGreatestFitness[iTime]
@@ -202,7 +203,7 @@ endTime = time.time()
 runTime = endTime - startTime
 print('Runtime: ' + str(runTime) + ' s')
 
-np.savez(bestPositionsSaveName, bestPositions = np.array(decodedPopulation[0,:]),greatestFitness = np.array(greatestFitness),nGenerations = np.array(nGenerations))
+np.savez(bestPositionsSaveName, bestPositions = np.array(bestDecodedChromosome),greatestFitness = np.array(greatestFitness),nGenerations = np.array(nGenerations))
 
 #Plots
 PlotFitness(nGenerations, greatestFitness)
