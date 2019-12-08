@@ -5,8 +5,8 @@ import networkx as nx
 #%matplotlib qt
 
 def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents):
-    fitness, maxFitness = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
-    return fitness, maxFitness
+    fitness, maxFitness, newVoiPositions = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
+    return fitness, maxFitness, newVoiPositions
 
 '''
 def initAgents(nAgents, nNodes):
@@ -31,7 +31,8 @@ def VoiDistanceFromCenter(nodePositions,voiPositions,networkCenter):
     voiDistanceFromCenter = np.matmul(voiPositions,np.sqrt(np.sum((nodePositions-networkCenter)**2,1)))/np.sum(voiPositions)
     return voiDistanceFromCenter
 
-def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
+def PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions):
+    fontSize = 20
     plt.figure()
     G = nx.from_numpy_matrix(cityMap)
     indices = {}
@@ -44,6 +45,7 @@ def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
         labels[i] = voiPositions[i]
     #nx.draw_networkx(G,poss)
     nx.draw(G, poss, labels=indices)
+    plt.title('Network with node indeces',fontsize=fontSize)
     
 def PlotFitness(fitness,maxFitness):
     fontSize = 20
@@ -58,13 +60,17 @@ def PlotFitness(fitness,maxFitness):
     plt.tick_params(axis='both', labelsize=fontSize)
     plt.title('Scooter usage',fontsize=fontSize)
     
+    meanRelativeVoiUsage = np.mean(np.divide(fitness,maxFitness))
+    
     plt.figure()
-    plt.plot(maxFitness-fitness,'k')
+    plt.plot(np.divide(fitness,maxFitness),'k')
+    plt.plot(np.ones(len(fitness))*meanRelativeVoiUsage,'--r')
     
     plt.xlabel('Time',fontsize=fontSize)
     plt.ylabel('Voi usage',fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
-    plt.title('Difference of maximum voi usage and actual voi usage',fontsize=fontSize)
+    plt.title('Actual voi usage relative to maximum voi usage',fontsize=fontSize)
+    plt.legend(['Relative voi usage','Mean relative voi usage (' + str(np.round(meanRelativeVoiUsage,3)) + ')'],fontsize=fontSize,frameon=False)
     
 def PlotVoiDistanceFromCenter(voiDistanceFromCenter):
     fontSize = 20
@@ -100,6 +106,32 @@ def PlotAverageVoisPerNode(voisPerNode):
     plt.xlabel('Node index',fontsize=fontSize)
     plt.ylabel('Avg. number of vois',fontsize=fontSize)
     plt.title('Average number of vois per node',fontsize=fontSize)
+    
+def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
+    fontSize = 20
+    plt.figure()
+    G = nx.from_numpy_matrix(cityMap)
+    indices = {}
+    poss = {}
+    for i in range(nCities):
+        poss[i] = cityPositions[i]
+        indices[i] = i
+    labels = {}
+    for i in range(nCities):
+        labels[i] = int(voiPositions[i])
+    nx.draw(G, poss, labels=labels)
+    plt.title('Scooter positions',fontsize=fontSize)
+    
+def PlotGreatestFitness(nGenerations,greatestFitness):
+    plt.figure()
+    plt.plot(np.linspace(0, nGenerations, nGenerations), greatestFitness[1:len(greatestFitness)], 'k')
+
+    fontSize = 20
+    plt.xlabel('Generations', fontsize=fontSize)
+    plt.ylabel('Greatest fitness', fontsize=fontSize)
+    plt.tick_params(axis='both', labelsize=fontSize)
+    plt.title('Greatest fitness of population',fontsize=fontSize)
+    plt.show()
 
 
 #Import map to use and agents
@@ -109,13 +141,16 @@ cityPositions = data_set['cityPositions']
 uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
+#Import optimized voi positions
+voiPositionData = np.load('Test.npz')
+
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 500
-nVois = 7*nCities
-nTimeSteps = 20
+nAgents = 100
+nVois = 1*nCities
+nTimeSteps = 100
 nGroups = nAgents
 mutationProbabilityAgents = 0
 
@@ -123,8 +158,9 @@ mutationProbabilityAgents = 0
 agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 
-#Initial voi distribution (uniform)
-voiPositions = np.ones(nCities)*nVois/nCities
+#Initial voi distribution
+voiPositions = np.ones(nCities)*nVois/nCities    ### UNIFORM VOI POSITIONS
+#voiPositions = voiPositionData['bestPositions']            ### OPTIMIZED VOI POSITIONS
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
@@ -137,17 +173,26 @@ for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
-     
-    agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
-    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
-    voisPerNode[:,iTime] = voiPositions
-    print(voiPositions)
-    voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,voiPositions,networkCenter)
+    voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+    #voiPositions[:] = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
+    
+    #Run simulation
+    fitness[iTime], maxFitness[iTime], newVoiPositions = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
+    
+    voisPerNode[:,iTime] = newVoiPositions
+    voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,newVoiPositions,networkCenter)
+
+    voiPositions = newVoiPositions
+
+#Load data for GA fitness plot
+nGenerations = voiPositionData['nGenerations']
+greatestFitness = voiPositionData['greatestFitness']
 
 #Plots
-PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
+PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)
 PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
+#PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions)
+#PlotGreatestFitness(nGenerations, greatestFitness)
 plt.show()

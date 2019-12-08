@@ -1,7 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
-import random
-import networkx as nx
 from heapq import heappush, heappop
 import math
 #np.random.seed(12378911)
@@ -117,7 +114,7 @@ def pathFindingDistances(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDire
             voiUsage += cityMap[currentNode,path[nodeIndex+1]]
             
         maxVoiUsage += cityMap[currentNode,path[nodeIndex+1]]
-    return (path, voiUsage, maxVoiUsage)
+    return (path, voiUsage, maxVoiUsage, vois)
 
 def ShuffleAgents(agents,nGroups):
     groupSize = int(np.floor(np.size(agents,0)/nGroups))
@@ -138,22 +135,28 @@ def MutateAgents(agents,nMutations,nNodes):
 ## --------------- { RUNNING } --------------- ##
 
 
-def runSimulation(voiPositions, nNodes, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents):
+def runSimulation(voiPositionsInit, nNodes, nAgents, cityMap, cityPositions, agentsInit, nGroups, mutationProbabilityAgents):
     voiUsage = 0
     maxVoiUsage = 0
     
+    #Copy the incoming arrays of agents and voiPositions
+    voiPositions = np.zeros(30)
+    voiPositions[:] = voiPositionsInit[:]
+    agents = np.zeros((nAgents,3),int)
+    agents[:,:] = agentsInit[:,:]
+    
     #Mutate agents start/end node
-    nMutations = int(np.round(mutationProbabilityAgents*nAgents))
+    nMutations = int(2*np.round(mutationProbabilityAgents*nAgents))
     agents = MutateAgents(agents,nMutations,nNodes)
     
     #Go forward direction (start -> end)
     agents = ShuffleAgents(agents,nGroups)
     for a in agents:
-        (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)
-        
+        (path, voiUsage, maxVoiUsage, voiPositions) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)  
+    
     #Go reverse direction (end -> start)
     agents = ShuffleAgents(agents,nGroups)
     for a in agents:
-        (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)   
+        (path, voiUsage, maxVoiUsage, voiPositions) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)   
     
-    return (voiUsage, maxVoiUsage)
+    return (voiUsage, maxVoiUsage, voiPositions)
