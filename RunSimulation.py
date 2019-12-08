@@ -5,8 +5,8 @@ import networkx as nx
 #%matplotlib qt
 
 def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents):
-    fitness, maxFitness = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
-    return fitness, maxFitness
+    fitness, maxFitness, newVoiPositions = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
+    return fitness, maxFitness, newVoiPositions
 
 '''
 def initAgents(nAgents, nNodes):
@@ -60,13 +60,17 @@ def PlotFitness(fitness,maxFitness):
     plt.tick_params(axis='both', labelsize=fontSize)
     plt.title('Scooter usage',fontsize=fontSize)
     
+    meanRelativeVoiUsage = np.mean(np.divide(fitness,maxFitness))
+    
     plt.figure()
-    plt.plot(maxFitness-fitness,'k')
+    plt.plot(np.divide(fitness,maxFitness),'k')
+    plt.plot(np.ones(len(fitness))*meanRelativeVoiUsage,'--r')
     
     plt.xlabel('Time',fontsize=fontSize)
     plt.ylabel('Voi usage',fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
-    plt.title('Difference of maximum voi usage and actual voi usage',fontsize=fontSize)
+    plt.title('Actual voi usage relative to maximum voi usage',fontsize=fontSize)
+    plt.legend(['Relative voi usage','Mean relative voi usage (' + str(np.round(meanRelativeVoiUsage,3)) + ')'],fontsize=fontSize,frameon=False)
     
 def PlotVoiDistanceFromCenter(voiDistanceFromCenter):
     fontSize = 20
@@ -102,6 +106,21 @@ def PlotAverageVoisPerNode(voisPerNode):
     plt.xlabel('Node index',fontsize=fontSize)
     plt.ylabel('Avg. number of vois',fontsize=fontSize)
     plt.title('Average number of vois per node',fontsize=fontSize)
+    
+def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
+    fontSize = 20
+    plt.figure()
+    G = nx.from_numpy_matrix(cityMap)
+    indices = {}
+    poss = {}
+    for i in range(nCities):
+        poss[i] = cityPositions[i]
+        indices[i] = i
+    labels = {}
+    for i in range(nCities):
+        labels[i] = int(voiPositions[i])
+    nx.draw(G, poss, labels=labels)
+    plt.title('Scooter positions',fontsize=fontSize)
 
 
 #Import map to use and agents
@@ -123,7 +142,7 @@ nAgents = 100
 nVois = 1*nCities
 nTimeSteps = 100
 nGroups = nAgents
-mutationProbabilityAgents = 0
+mutationProbabilityAgents = 0.05
 
 #Load agents
 agents = np.zeros((nAgents,3),int)
@@ -146,15 +165,19 @@ for iTime in range(nTimeSteps):
         
     #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
     #voiPositions[:] = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
-     
-    agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
-    fitness[iTime], maxFitness[iTime] = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
-    voisPerNode[:,iTime] = voiPositions
-    voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,voiPositions,networkCenter)
+    
+    #Run simulation
+    fitness[iTime], maxFitness[iTime], newVoiPositions = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
+    
+    voisPerNode[:,iTime] = newVoiPositions
+    voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,newVoiPositions,networkCenter)
 
+    voiPositions = newVoiPositions
+ 
 #Plots
 PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
 PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
+PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
 plt.show()
