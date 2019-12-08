@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import TempSim
-#%matplotlib qt
 import time
-#import networkx as nx
+import networkx as nx
+#%matplotlib qt
 
 def InitializePopulation(nCities, populationSize):
     population = np.random.rand(populationSize, nCities)
@@ -113,6 +113,7 @@ def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
     
 
 plt.close("all")
+startTime = time.time()
 
 data_set = np.load('MapToUseNew.npz')
 cityMap = data_set['cityMap']
@@ -129,16 +130,16 @@ mutationProbabilityAgents = 0
 nGroups = nAgents
 
 #GA parameters
-nGenerations = 10
+nGenerations = 3000
 nRepetitions = 1
 populationSize = 30
 tournamentSize = 2
 tournamentProbability = 0.7
-mutationProbability = 1/nCities
+mutationProbability = 3/nCities
 creepRate = 0.1
 elitismNumber = 1
 zeroThreshold = 0
-bestPositionsSaveName = 'BestVoiPositionsTest'
+bestPositionsSaveName = 'Test'
 
 agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
@@ -185,11 +186,14 @@ for iTime in range(nGenerations):
 
     newPopulation[0:elitismNumber, :] = bestChromosome
     population = newPopulation
+    
+endTime = time.time()
+runTime = endTime - startTime
+print('Runtime: ' + str(runTime) + ' s')
 
 decodedPopulation = DecodePopulation(nVois, population, zeroThreshold)
 np.savez(bestPositionsSaveName, bestPositions = np.array(decodedPopulation[0,:]),greatestFitness = np.array(greatestFitness))
 
-print(decodedPopulation[0, :])
 PlotFitness(nGenerations, greatestFitness)
-#PlotGraphAndVois(cityMap,nCities,decodedPopulation[0,:],cityPositions)
+PlotGraphAndVois(cityMap,nCities,decodedPopulation[0,:],cityPositions)
 plt.show()
