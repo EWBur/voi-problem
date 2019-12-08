@@ -159,8 +159,8 @@ agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 
 #Initial voi distribution
-#voiPositions = np.ones(nCities)*nVois/nCities    ### UNIFORM VOI POSITIONS
-voiPositions = voiPositionData['bestPositions']            ### OPTIMIZED VOI POSITIONS
+voiPositions = np.ones(nCities)*nVois/nCities    ### UNIFORM VOI POSITIONS
+#voiPositions = voiPositionData['bestPositions']            ### OPTIMIZED VOI POSITIONS
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
@@ -173,8 +173,8 @@ for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
-    voiPositions[:] = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
+    voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+    #voiPositions[:] = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
     
     #Run simulation
     fitness[iTime], maxFitness[iTime], newVoiPositions = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
@@ -193,6 +193,6 @@ PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)
 PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
-PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions)
-PlotGreatestFitness(nGenerations, greatestFitness)
+#PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions)
+#PlotGreatestFitness(nGenerations, greatestFitness)
 plt.show()
