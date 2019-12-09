@@ -142,7 +142,7 @@ uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
-voiPositionData = np.load('Test.npz')
+voiPositionData = np.load('200_2_0_nAgents.npz')
 
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)

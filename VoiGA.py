@@ -145,8 +145,8 @@ uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = 150
-nVois = nCities*1
+nAgents = 200
+nVois = nCities*2
 
 #Simulation parameters
 mutationProbabilityAgents = 0
@@ -163,7 +163,7 @@ crossoverProbability = 0.7
 creepRate = 0.2
 elitismNumber = 1
 zeroThreshold = 0
-bestPositionsSaveName = '150_1_0_nAgents'
+bestPositionsSaveName = 'Test'
 
 #Initialize agents
 agents = np.zeros((nAgents,3),int)
