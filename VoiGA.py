@@ -9,6 +9,10 @@ def InitializePopulation(nCities, populationSize):
     population = np.random.rand(populationSize, nCities)
     return population
 
+def InitializePopulationDynamic(nCities, populationSize):
+    population = np.random.rand(populationSize,nCities,nCities)
+    return population
+
 '''
 def DecodePopulation(nVois, population, zeroThreshold):
     nCities = np.size(population, 1)
@@ -54,6 +58,25 @@ def DecodePopulationNew(nVois, population, zeroThreshold):
 
     return decodedPopulation
 
+def DecodePopulationDynamic(nVoisToMove,population,cityMap,voiPositions):
+    nNodes = np.size(population,1)
+    nChromosomes = np.size(population,0)
+    
+    cityMapCopy = np.zeros((nNodes,nNodes))
+    cityMapCopy[:,:] = cityMap[:,:]
+    np.fill_diagonal(cityMapCopy,1)
+    cityMapBinary = np.tile(np.heaviside(cityMapCopy,0),(populationSize,1,1))
+    
+    populationEdges = population*cityMapBinary
+    
+    moveMatrix = populationEdges - np.transpose(populationEdges,(0, 2, 1))
+    for iChromosome in range(nChromosomes):
+        diagonal = np.diag(np.diag(populationEdges[iChromosome,:,:]))
+        moveMatrix[iChromosome,:,:] = moveMatrix[iChromosome,:,:] + diagonal
+    
+    moveMatrix = np.triu(moveMatrix)*np.tile(voiPositions.T,(populationSize,nNodes,1))
+    return moveMatrix
+
 
 def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositions, nRepetitions, agents, nGroups,mutationProbabilityAgents):
     nIndividuals = np.size(decodedPopulation, 0)
@@ -62,7 +85,7 @@ def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositi
     
     for vv in range(nIndividuals):
         for iRepetition in range(nRepetitions):
-            tempFitness, tempMaxPopulation, newVoiPositions = TempSim.runSimulation(decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
+            tempFitness, tempMaxPopulation, newVoiPositions, nodeUsage = TempSim.runSimulation(decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
         
         populationFitness[vv] += tempFitness/nRepetitions
         maxPopulationFitness[vv] += tempMaxPopulation/nRepetitions
@@ -145,16 +168,16 @@ uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = 200
+nAgents = 300
 nVois = nCities*2
 
 #Simulation parameters
-mutationProbabilityAgents = 0
-nGroups = nAgents
+mutationProbabilityAgents = 0.1
+nGroups = int(nAgents/10)
 
 #GA parameters
-nGenerations = 1000
-nRepetitions = 1
+nGenerations = 300
+nRepetitions = 3
 populationSize = 30
 tournamentSize = 2
 tournamentProbability = 0.7
@@ -163,7 +186,7 @@ crossoverProbability = 0.7
 creepRate = 0.2
 elitismNumber = 1
 zeroThreshold = 0
-bestPositionsSaveName = 'Test'
+bestPositionsSaveName = '300_2_01_nAgents10'
 
 #Initialize agents
 agents = np.zeros((nAgents,3),int)
@@ -172,8 +195,14 @@ agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 #Initialize GA population
 population = InitializePopulation(nCities, populationSize)
 
+'''
+nVoisToMove = 2
+voiPositions = np.ones(nCities)
+population = InitializePopulationDynamic(nCities, populationSize)
+moveMatrix = DecodePopulationDynamic(nVoisToMove,population,cityMap,voiPositions)
+'''
+
 greatestFitness = np.zeros(nGenerations+1)
-#maxGreatestFitness = np.zeros(nGenerations+1)
 
 #Run GA
 for iTime in range(nGenerations):
@@ -190,12 +219,10 @@ for iTime in range(nGenerations):
     generationGreatestFitness = np.max(populationFitness)
     if generationGreatestFitness > greatestFitness[iTime]:
         greatestFitness[iTime+1] = generationGreatestFitness
-        #maxGreatestFitness[iTime+1] = maxPopulationFitness[np.argmax(populationFitness)]
         bestChromosome = population[np.argmax(populationFitness), :]
         bestDecodedChromosome = decodedPopulation[np.argmax(populationFitness), :]
     else:
         greatestFitness[iTime+1] = greatestFitness[iTime]
-        #maxGreatestFitness[iTime+1] = maxGreatestFitness[iTime]
     
     #Generate new population
     newPopulation = np.zeros((populationSize, nCities))

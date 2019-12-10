@@ -5,8 +5,8 @@ import networkx as nx
 #%matplotlib qt
 
 def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents):
-    fitness, maxFitness, newVoiPositions = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
-    return fitness, maxFitness, newVoiPositions
+    fitness, maxFitness, newVoiPositions, nodeUsage = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
+    return fitness, maxFitness, newVoiPositions, nodeUsage
 
 '''
 def initAgents(nAgents, nNodes):
@@ -133,6 +133,30 @@ def PlotGreatestFitness(nGenerations,greatestFitness):
     plt.title('Greatest fitness of population',fontsize=fontSize)
     plt.show()
 
+def UpdateLimitedVoiPositions(voiPositions,nodeUsage,noVoisToReposition,optimalVoiPositions):
+    nNodes = len(voiPositions)
+    
+    tooManyVois = np.maximum(voiPositions - optimalVoiPositions,0)
+    tooFewVois = np.maximum(optimalVoiPositions - voiPositions,0)
+    
+    #Add vois to nodes
+    weightedSortedNodeUsage = nodeUsage*tooFewVois/sum(nodeUsage*tooFewVois)*noVoisToReposition
+    addedVois = np.floor(weightedSortedNodeUsage)
+    
+    nVoisToPlace = noVoisToReposition - np.sum(addedVois)
+    sortingIndeces = np.argsort(weightedSortedNodeUsage - addedVois)
+    addedVois[sortingIndeces[int(nNodes-nVoisToPlace):nNodes]] += 1
+    
+    #Remove vois from nodes
+    removedVois = np.zeros(nNodes)
+    for i in range(noVoisToReposition):
+        nodeToTakeFrom = np.argmax(tooManyVois)
+        tooManyVois[nodeToTakeFrom] -= 1
+        removedVois[nodeToTakeFrom] +=1
+        
+    newVoiPositions = voiPositions + addedVois - removedVois
+    return newVoiPositions
+        
 
 #Import map to use and agents
 data_set = np.load('MapToUseNew.npz')
@@ -142,17 +166,19 @@ uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
-voiPositionData = np.load('200_2_0_nAgents.npz')
+voiPositionData = np.load('300_2_01_nAgents10.npz')
 
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 200
+nAgents = 300
 nVois = 2*nCities
-nTimeSteps = 2
-nGroups = nAgents
-mutationProbabilityAgents = 0
+nTimeSteps = 50
+mutationProbabilityAgents = 0.1
+nGroups = int(nAgents/10)
+
+noVoisToReposition = 10
 
 #Load agents
 agents = np.zeros((nAgents,3),int)
@@ -160,28 +186,28 @@ agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 
 #Initial voi distribution
 voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
-#voiPositions = voiPositionData['bestPositions']        ### OPTIMIZED VOI POSITIONS
+#voiPositions = voiPositionData['bestPositions']          ### (OPTIMIZED)
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
 voiDistanceFromCenter = np.zeros(nTimeSteps)
 voisPerNode = np.zeros((nCities, nTimeSteps))
 
-PlotAgentsStartEndDistribution(agents,nCities)
-
 for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
     voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
-    #voiPositions[:] = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
+    #voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
     
     #Run simulation
-    fitness[iTime], maxFitness[iTime], newVoiPositions = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
+    fitness[iTime], maxFitness[iTime], newVoiPositions, nodeUsage = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
     
     voisPerNode[:,iTime] = newVoiPositions
     voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,newVoiPositions,networkCenter)
 
+    #newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,np.ones(nCities)*nVois/nCities) ### (UNIFORM)
+    #newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,voiPositionData['bestPositions']) ### (OPTIMIZED)
     voiPositions = newVoiPositions
 
 #Load data for GA fitness plot
@@ -193,6 +219,8 @@ PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)
 PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
-#PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions)
-#PlotGreatestFitness(nGenerations, greatestFitness)
+PlotAgentsStartEndDistribution(agents,nCities)
+PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions)
+PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
+PlotGreatestFitness(nGenerations, greatestFitness)
 plt.show()

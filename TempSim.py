@@ -116,12 +116,42 @@ def pathFindingDistances(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDire
         maxVoiUsage += cityMap[currentNode,path[nodeIndex+1]]
     return (path, voiUsage, maxVoiUsage, vois)
 
+def pathFindingDistancesNew(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDirection, nodeUsage):
+    (current, start, end) = agent
+    if reverseDirection == 1:
+        (current, end, start) = agent
+        current = end
+    
+    (cost,path) = find_path([current,start,end], cityMap,vois)
+    
+    hasVoi = 0
+    for nodeIndex in range(len(path[0: -1])):
+        currentNode = path[nodeIndex]       #same as c above
+        if vois[currentNode] > 0 and hasVoi == 0:
+            hasVoi = 1
+            vois[currentNode] -= 1
+            vois[end] += 1
+            
+            tempValue = 0
+            for iNode in range(nodeIndex,0,-1):
+                node = path[iNode]
+                nodeBefore = path[iNode-1]
+                tempValue += cityMap[node,nodeBefore]
+                nodeUsage[nodeBefore] += tempValue
+         
+        if hasVoi == 1:
+            voiUsage += cityMap[currentNode,path[nodeIndex+1]]
+            
+        maxVoiUsage += cityMap[currentNode,path[nodeIndex+1]]
+    return (path, voiUsage, maxVoiUsage, vois, nodeUsage)
+
 def ShuffleAgents(agents,nGroups):
     groupSize = int(np.floor(np.size(agents,0)/nGroups))
     for groupIndex in range(nGroups):
         np.random.shuffle(agents[groupIndex*groupSize:(groupIndex+1)*groupSize])
     return agents
 
+'''
 def MutateAgents(agents,nMutations,nNodes):
     nAgents = np.size(agents,0)
     mutationIndeces = np.random.randint(0,nAgents,nMutations)
@@ -130,6 +160,14 @@ def MutateAgents(agents,nMutations,nNodes):
         randomNode = np.random.randint(0,nNodes)
         randomStartEnd = np.random.randint(1,3)    
         agents[mutationIndeces[iMutation],randomStartEnd]  = randomNode   
+    return agents
+'''
+
+def MutateAgents(agents,mutationProbability,nNodes):
+    nAgents = np.size(agents,0)
+    indecesToMutate = np.heaviside(-(np.random.rand(nAgents,2)-mutationProbability),0)
+    randomNodes = np.random.randint(0,nNodes,(nAgents,2))
+    agents[:,1:3] = agents[:,1:3] + indecesToMutate*(randomNodes - agents[:,1:3])   
     return agents
 
 ## --------------- { RUNNING } --------------- ##
@@ -140,23 +178,26 @@ def runSimulation(voiPositionsInit, nNodes, nAgents, cityMap, cityPositions, age
     maxVoiUsage = 0
     
     #Copy the incoming arrays of agents and voiPositions
-    voiPositions = np.zeros(30)
+    voiPositions = np.zeros(nNodes)
     voiPositions[:] = voiPositionsInit[:]
     agents = np.zeros((nAgents,3),int)
     agents[:,:] = agentsInit[:,:]
     
     #Mutate agents start/end node
-    nMutations = int(2*np.round(mutationProbabilityAgents*nAgents))
-    agents = MutateAgents(agents,nMutations,nNodes)
+    agents = MutateAgents(agents,mutationProbabilityAgents,nNodes)
     
     #Go forward direction (start -> end)
     agents = ShuffleAgents(agents,nGroups)
+
+    nodeUsage = np.zeros(nNodes)
     for a in agents:
-        (path, voiUsage, maxVoiUsage, voiPositions) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)  
-    
+        (path, voiUsage, maxVoiUsage, voiPositions, nodeUsage) = pathFindingDistancesNew(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0, nodeUsage)
+        #(path, voiUsage, maxVoiUsage, voiPositions) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)  
+        
     #Go reverse direction (end -> start)
     agents = ShuffleAgents(agents,nGroups)
     for a in agents:
-        (path, voiUsage, maxVoiUsage, voiPositions) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)   
+        (path, voiUsage, maxVoiUsage, voiPositions, nodeUsage) = pathFindingDistancesNew(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1, nodeUsage)
+        #(path, voiUsage, maxVoiUsage, voiPositions) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)   
     
-    return (voiUsage, maxVoiUsage, voiPositions)
+    return (voiUsage, maxVoiUsage, voiPositions, nodeUsage)

@@ -4,8 +4,8 @@ import TempSim
 #%matplotlib qt
 
 def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents):
-    fitness, maxFitness, newVoiPositions = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
-    return fitness, maxFitness, newVoiPositions
+    fitness, maxFitness, newVoiPositions, nodeUsage = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
+    return fitness, maxFitness, newVoiPositions, nodeUsage
 
 def PlotFitness(fitness,maxFitness,nAgents,nVois,nCities):
     fontSize = 20
@@ -31,8 +31,8 @@ uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = np.asarray([50,100,150,200,250])
-nVois = np.asarray([1,2])*nCities
+nAgents = np.asarray([50,100,150,200,250,300,400,500,600,750,1000,1250,1500])
+nVois = np.asarray([1,2,3])*nCities
 nRepetitions = 1
 
 mutationProbabilityAgents = 0
@@ -51,7 +51,7 @@ for iVois in range(len(nVois)):
             voiPositions = np.ones(nCities)*nVois[iVois]/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
             
             #Run simulation
-            fitnessTemp, maxFitnessTemp, newVoiPositions = FitnessOfPopulation(voiPositions, nCities, nAgents[jAgents], cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
+            fitnessTemp, maxFitnessTemp, newVoiPositions, nodeUsage = FitnessOfPopulation(voiPositions, nCities, nAgents[jAgents], cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
             
             fitnessData[iVois,jAgents] += fitnessTemp/nRepetitions
             maxFitnessData[iVois,jAgents] += maxFitnessTemp/nRepetitions
