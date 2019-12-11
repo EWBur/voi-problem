@@ -166,7 +166,7 @@ uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
-voiPositionData = np.load('300_2_01_nAgents10.npz')
+voiPositionData = np.load('500_2_0_nAgents.npz')
 
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
@@ -175,8 +175,8 @@ networkCenter = FindGraphCenter(cityPositions)
 nAgents = 300
 nVois = 2*nCities
 nTimeSteps = 50
-mutationProbabilityAgents = 0.1
-nGroups = int(nAgents/10)
+mutationProbabilityAgents = 0
+nGroups = int(nAgents)
 
 noVoisToReposition = 10
 
@@ -185,8 +185,8 @@ agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 
 #Initial voi distribution
-voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
-#voiPositions = voiPositionData['bestPositions']          ### (OPTIMIZED)
+#voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
+voiPositions = voiPositionData['bestPositions']          ### (OPTIMIZED)
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
@@ -197,7 +197,7 @@ for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
     #voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
     
     #Run simulation
@@ -207,7 +207,7 @@ for iTime in range(nTimeSteps):
     voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,newVoiPositions,networkCenter)
 
     #newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,np.ones(nCities)*nVois/nCities) ### (UNIFORM)
-    #newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,voiPositionData['bestPositions']) ### (OPTIMIZED)
+    newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,voiPositionData['bestPositions']) ### (OPTIMIZED)
     voiPositions = newVoiPositions
 
 #Load data for GA fitness plot

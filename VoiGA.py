@@ -168,16 +168,16 @@ uniformAgents = data_set['uniformAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = 300
+nAgents = 500
 nVois = nCities*2
 
 #Simulation parameters
-mutationProbabilityAgents = 0.1
-nGroups = int(nAgents/10)
+mutationProbabilityAgents = 0
+nGroups = int(nAgents)
 
 #GA parameters
-nGenerations = 300
-nRepetitions = 3
+nGenerations = 500
+nRepetitions = 1
 populationSize = 30
 tournamentSize = 2
 tournamentProbability = 0.7
@@ -186,7 +186,7 @@ crossoverProbability = 0.7
 creepRate = 0.2
 elitismNumber = 1
 zeroThreshold = 0
-bestPositionsSaveName = '300_2_01_nAgents10'
+bestPositionsSaveName = '500_2_0_nAgents'
 
 #Initialize agents
 agents = np.zeros((nAgents,3),int)
