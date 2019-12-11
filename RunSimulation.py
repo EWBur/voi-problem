@@ -107,7 +107,7 @@ def PlotAverageVoisPerNode(voisPerNode):
     plt.ylabel('Avg. number of vois',fontsize=fontSize)
     plt.title('Average number of vois per node',fontsize=fontSize)
     
-def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
+def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions,nodeSize):
     fontSize = 20
     plt.figure()
     G = nx.from_numpy_matrix(cityMap)
@@ -119,7 +119,7 @@ def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
     labels = {}
     for i in range(nCities):
         labels[i] = int(voiPositions[i])
-    nx.draw(G, poss, labels=labels)
+    nx.draw(G, poss, labels=labels,node_size = nodeSize,font_size = fontSize)
     plt.title('Scooter positions',fontsize=fontSize)
     
 def PlotGreatestFitness(nGenerations,greatestFitness):
@@ -172,13 +172,13 @@ voiPositionData = np.load('500_2_0_nAgents.npz')
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 300
+nAgents = 100
 nVois = 2*nCities
-nTimeSteps = 50
+nTimeSteps = 1
 mutationProbabilityAgents = 0
 nGroups = int(nAgents)
 
-noVoisToReposition = 10
+noVoisToReposition = 0
 
 #Load agents
 agents = np.zeros((nAgents,3),int)
@@ -214,13 +214,15 @@ for iTime in range(nTimeSteps):
 nGenerations = voiPositionData['nGenerations']
 greatestFitness = voiPositionData['greatestFitness']
 
+nodeSize = (np.bincount(agents[:,1]) + np.bincount(agents[:,2]))/nAgents*5000
+
 #Plots
 PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)
 PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
 PlotAgentsStartEndDistribution(agents,nCities)
-PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions)
-PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions)
+PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions,nodeSize)
+PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions,nodeSize)
 PlotGreatestFitness(nGenerations, greatestFitness)
 plt.show()
