@@ -30,7 +30,7 @@ def buildPaths(cities, maxDist, nNodes):
     return cityMap
 '''
 
-def find_path(agent, city_map, vois):
+def find_path(agent, city_map, vois, costRelation):
     [current, start, end] = agent
     h, w = np.shape(city_map)
     place_index_map = []
@@ -62,7 +62,7 @@ def find_path(agent, city_map, vois):
         for j in neighbours:
             ## THIS IS THE VOI-LOGIC
             if np.any([vois[c] >= 1 for c in current_place['visited_cities'] + [j]]):
-                n_value = value + city_map[place_i, j]/2
+                n_value = value + city_map[place_i, j]/costRelation
             else:
                 n_value = value + city_map[place_i, j]
             path = (place_i, j)
@@ -116,13 +116,13 @@ def pathFindingDistances(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDire
         maxVoiUsage += cityMap[currentNode,path[nodeIndex+1]]
     return (path, voiUsage, maxVoiUsage, vois)
 
-def pathFindingDistancesNew(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDirection, nodeUsage):
+def pathFindingDistancesNew(agent, cityMap, vois, voiUsage, maxVoiUsage,reverseDirection, nodeUsage,costRelation):
     (current, start, end) = agent
     if reverseDirection == 1:
         (current, end, start) = agent
         current = end
     
-    (cost,path) = find_path([current,start,end], cityMap,vois)
+    (cost,path) = find_path([current,start,end], cityMap,vois,costRelation)
     
     hasVoi = 0
     for nodeIndex in range(len(path[0: -1])):
@@ -176,6 +176,7 @@ def MutateAgents(agents,mutationProbability,nNodes):
 def runSimulation(voiPositionsInit, nNodes, nAgents, cityMap, cityPositions, agentsInit, nGroups, mutationProbabilityAgents):
     voiUsage = 0
     maxVoiUsage = 0
+    costRelation = 2#1.33
     
     #Copy the incoming arrays of agents and voiPositions
     voiPositions = np.zeros(nNodes)
@@ -191,13 +192,13 @@ def runSimulation(voiPositionsInit, nNodes, nAgents, cityMap, cityPositions, age
 
     nodeUsage = np.zeros(nNodes)
     for a in agents:
-        (path, voiUsage, maxVoiUsage, voiPositions, nodeUsage) = pathFindingDistancesNew(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0, nodeUsage)
+        (path, voiUsage, maxVoiUsage, voiPositions, nodeUsage) = pathFindingDistancesNew(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0, nodeUsage,costRelation)
         #(path, voiUsage, maxVoiUsage, voiPositions) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,0)  
         
     #Go reverse direction (end -> start)
     agents = ShuffleAgents(agents,nGroups)
     for a in agents:
-        (path, voiUsage, maxVoiUsage, voiPositions, nodeUsage) = pathFindingDistancesNew(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1, nodeUsage)
+        (path, voiUsage, maxVoiUsage, voiPositions, nodeUsage) = pathFindingDistancesNew(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1, nodeUsage,costRelation)
         #(path, voiUsage, maxVoiUsage, voiPositions) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)   
     
     return (voiUsage, maxVoiUsage, voiPositions, nodeUsage)
