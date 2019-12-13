@@ -43,7 +43,7 @@ def PlotGraph(edges, nodes):
              fromCityPositions[1][:], toCityPositions[1][:]], 'k', linewidth=lineWidth)
     plt.plot(nodes[:, 0], nodes[:, 1], 'or', markersize=markerSize)
     plt.show()
-    
+
 def initAgents(nAgents,nNodes,cityPositions):
     agents = np.zeros((nAgents, 3), dtype=np.int8)
     for i in range(nAgents):
@@ -77,7 +77,7 @@ def GetEndNodeProbability(centerDistances):
     totalInverseDistance = sum(inverseDistance)
     endNodeProbability = inverseDistance/totalInverseDistance
     return endNodeProbability
-    
+
 plt.close("all")
 
 nNodes = 30
@@ -94,9 +94,15 @@ uniformAgents = data_set['uniformAgents']
 #cityPositions = np.random.rand(nNodes, 2)
 #cityMap = buildPaths(cityPositions, maxDist, nNodes)
 
+'''
+np.random.seed(12378911)
+cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
+cityPositions = np.random.rand(nNodes, 2)
+cityMap = buildPaths(cityPositions, maxDist, nNodes)
+>>>>>>> 4845774a6ef7c0558326b0844710fd52e3d8d361
 distributedAgents = initAgents(nAgents, nNodes,cityPositions)
 print(distributedAgents)
-
+'''
 
 np.savez('MapToUse4', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), distributedAgents = distributedAgents, uniformAgents = uniformAgents)
 
