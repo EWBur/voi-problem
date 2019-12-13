@@ -43,18 +43,33 @@ def PlotGraph(edges, nodes):
     plt.plot(nodes[:, 0], nodes[:, 1], 'or', markersize=markerSize)
     plt.show()
     
-def initAgents(nAgents, nNodes):
+def initAgents(nAgents,nNodes,cityPositions):
     agents = np.zeros((nAgents, 3), dtype=np.int8)
     for i in range(nAgents):
         cityIndexes = [x for x in range(nNodes)]
         startCity = np.random.choice(cityIndexes, 1)
         currentCity = startCity
         cityIndexes.remove(startCity)
-        endCity = np.random.choice(cityIndexes, 1)
+        # Beräkna nodernas avstånd från network center
+        networkCenter = FindGraphCenter(cityPositions)
+        centerDistances = FindDistancesToCenter(cityPositions,networkCenter)
+        # Beräkna probability att noderna väljs som slutnod
+        accumulatedDistances = sum(centerDistances)
+        endNodeProbability = 1/(centerDistances/accumulatedDistances)
+        endCity = np.random.choice(cityIndexes, 1, p = endNodeProbability)
         agents[i, 0] = currentCity
         agents[i, 1] = startCity
         agents[i, 2] = endCity
     return agents
+
+def FindGraphCenter(nodePositions):
+    networkCenter = np.sum(nodePositions,0)/np.size(nodePositions,0)
+    return networkCenter
+
+def FindDistancesToCenter(cityPositions,networkCenter):
+    centerDistances = np.sqrt(
+        (cityPositions[:,0] - networkCenter[:,0])**2 + (cityPositions[:,1] - networkCenter[:,1])**2)
+    return centerDistances
     
 plt.close("all")
 
@@ -68,7 +83,7 @@ nAgents = 5000
 #cityMap = buildPaths(cityPositions, maxDist, nNodes)
 #uniformAgents = initAgents(nAgents, nNodes)
 
-np.savez('MapToUseNew', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), uniformAgents = uniformAgents)
+#np.savez('MapToUseNew2', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), uniformAgents = uniformAgents)
 
 #data_set = np.load('Test2.npz')
 #cityMap = data_set['cityMap']
