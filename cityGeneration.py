@@ -72,8 +72,9 @@ def FindDistancesToCenter(cityPositions,networkCenter):
     return centerDistances
 
 def GetEndNodeProbability(centerDistances):
-    accumulatedDistances = sum(centerDistances)
-    endNodeProbability = centerDistances/accumulatedDistances
+    inverseDistance = 1/centerDistances
+    totalInverseDistance = sum(inverseDistance)
+    endNodeProbability = inverseDistance/totalInverseDistance
     return endNodeProbability
     
 plt.close("all")
