@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def buildPaths(cities, maxDist, nNodes):
     cityMap = np.zeros((nNodes, nNodes))
     for i in range(len(cities)):
@@ -83,15 +84,21 @@ nNodes = 30
 maxDist = 0.22
 nAgents = 5000
 
-np.random.seed(12378911)
-cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
-cityPositions = np.random.rand(nNodes, 2)
-cityMap = buildPaths(cityPositions, maxDist, nNodes)
+data_set = np.load('MapToUseNew.npz')
+cityMap = data_set['cityMap']
+cityPositions = data_set['cityPositions']
+uniformAgents = data_set['uniformAgents']
+
+#np.random.seed(12378911)
+#cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
+#cityPositions = np.random.rand(nNodes, 2)
+#cityMap = buildPaths(cityPositions, maxDist, nNodes)
+
 distributedAgents = initAgents(nAgents, nNodes,cityPositions)
 print(distributedAgents)
 
 
-np.savez('TestAgentDistribution', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), distributedAgents = distributedAgents)
+np.savez('MapToUse4', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), distributedAgents = distributedAgents, uniformAgents = uniformAgents)
 
 #data_set = np.load('Test2.npz')
 #cityMap = data_set['cityMap']
