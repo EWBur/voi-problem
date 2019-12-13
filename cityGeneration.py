@@ -50,12 +50,10 @@ def initAgents(nAgents,nNodes,cityPositions):
         startCity = np.random.choice(cityIndexes, 1)
         currentCity = startCity
         cityIndexes.remove(startCity)
-        # Beräkna nodernas avstånd från network center
         networkCenter = FindGraphCenter(cityPositions)
-        centerDistances = FindDistancesToCenter(cityPositions,networkCenter)
-        # Beräkna probability att noderna väljs som slutnod
-        accumulatedDistances = sum(centerDistances)
-        endNodeProbability = 1/(centerDistances/accumulatedDistances)
+        possibleEndNodes = np.delete(cityPositions,startCity,axis=0)
+        centerDistances = FindDistancesToCenter(possibleEndNodes,networkCenter)
+        endNodeProbability = GetEndNodeProbability(centerDistances)
         endCity = np.random.choice(cityIndexes, 1, p = endNodeProbability)
         agents[i, 0] = currentCity
         agents[i, 1] = startCity
@@ -67,9 +65,16 @@ def FindGraphCenter(nodePositions):
     return networkCenter
 
 def FindDistancesToCenter(cityPositions,networkCenter):
+    xValues = cityPositions[:,0] - networkCenter[0]
+    yValues = cityPositions[:,1] - networkCenter[1]
     centerDistances = np.sqrt(
-        (cityPositions[:,0] - networkCenter[:,0])**2 + (cityPositions[:,1] - networkCenter[:,1])**2)
+        np.power(xValues,2) + np.power(yValues,2))
     return centerDistances
+
+def GetEndNodeProbability(centerDistances):
+    accumulatedDistances = sum(centerDistances)
+    endNodeProbability = centerDistances/accumulatedDistances
+    return endNodeProbability
     
 plt.close("all")
 
@@ -77,13 +82,15 @@ nNodes = 30
 maxDist = 0.22
 nAgents = 5000
 
-#np.random.seed(12378911)
-#cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
-#cityPositions = np.random.rand(nNodes, 2)
-#cityMap = buildPaths(cityPositions, maxDist, nNodes)
-#uniformAgents = initAgents(nAgents, nNodes)
+np.random.seed(12378911)
+cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
+cityPositions = np.random.rand(nNodes, 2)
+cityMap = buildPaths(cityPositions, maxDist, nNodes)
+distributedAgents = initAgents(nAgents, nNodes,cityPositions)
+print(distributedAgents)
 
-#np.savez('MapToUseNew2', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), uniformAgents = uniformAgents)
+
+np.savez('TestAgentDistribution', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), distributedAgents = distributedAgents)
 
 #data_set = np.load('Test2.npz')
 #cityMap = data_set['cityMap']
