@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import TempSim
 import networkx as nx
 import matplotlib.animation
-matplotlib.use("Agg")
+#matplotlib.use("Agg")
 
 
 
@@ -171,7 +171,6 @@ def update(iTime,*fargs):
     #agents = ShuffleAgents(agents,nGroups)
     for a in agents:
         print(voiPositions)
-
         (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, 0, 0,0)
         node_color = ['green' if voiPositions[n] >= 1 else 'blue' for n in G.nodes]
         for p in path:
@@ -205,5 +204,5 @@ def SaveVideo(fileName):
                     writer.grab_frame()
 
 
-#LiveVideo()
-SaveVideo('movieTestLarger.mp4')
+LiveVideo()
+#SaveVideo('movieTestLarger.mp4')
