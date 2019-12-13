@@ -160,11 +160,11 @@ def UpdateLimitedVoiPositions(voiPositions,nodeUsage,noVoisToReposition,optimalV
 
 #Import map to use and agents
 #data_set = np.load('MapToUseNew.npz')
-data_set = np.load('TestAgentDistribution.npz')
+data_set = np.load('TestAgentDistribution2.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
-#uniformAgents = data_set['uniformAgents']
-uniformAgents = data_set['distributedAgents']
+uniformAgents = data_set['uniformAgents']
+distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
@@ -174,7 +174,7 @@ voiPositionData = np.load('200_2_0_nAgents.npz')
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 3000
+nAgents = 5000
 nVois = 0*nCities
 nTimeSteps = 1
 mutationProbabilityAgents = 0
@@ -185,6 +185,7 @@ noVoisToReposition = 0
 #Load agents
 agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
+agents[0:nAgents,:] = distributedAgents[0:nAgents,:]
 
 #Initial voi distribution
 voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
@@ -216,8 +217,8 @@ for iTime in range(nTimeSteps):
 nGenerations = voiPositionData['nGenerations']
 greatestFitness = voiPositionData['greatestFitness']
 
-nodeSize = (np.bincount(agents[:,1]) + np.bincount(agents[:,2]))/nAgents*20000
-#nodeSize = (np.bincount(agents[:,2]))/nAgents*20000
+#nodeSize = (np.bincount(agents[:,1]) + np.bincount(agents[:,2]))/nAgents*20000
+nodeSize = (np.bincount(agents[:,2]))/nAgents*20000
 
 #Plots
 PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)

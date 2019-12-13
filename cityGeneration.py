@@ -82,16 +82,16 @@ plt.close("all")
 nNodes = 30
 maxDist = 0.22
 nAgents = 5000
-
+'''
 np.random.seed(12378911)
 cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
 cityPositions = np.random.rand(nNodes, 2)
 cityMap = buildPaths(cityPositions, maxDist, nNodes)
 distributedAgents = initAgents(nAgents, nNodes,cityPositions)
 print(distributedAgents)
+'''
 
-
-np.savez('TestAgentDistribution', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), distributedAgents = distributedAgents)
+np.savez('TestAgentDistribution2', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), uniformAgents = np.array(uniformAgents), distributedAgents = distributedAgents)
 
 #data_set = np.load('Test2.npz')
 #cityMap = data_set['cityMap']
