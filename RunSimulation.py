@@ -5,8 +5,8 @@ import networkx as nx
 #%matplotlib qt
 
 def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents):
-    fitness, maxFitness, newVoiPositions = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
-    return fitness, maxFitness, newVoiPositions
+    fitness, maxFitness, newVoiPositions, nodeUsage = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
+    return fitness, maxFitness, newVoiPositions, nodeUsage
 
 '''
 def initAgents(nAgents, nNodes):
@@ -107,7 +107,7 @@ def PlotAverageVoisPerNode(voisPerNode):
     plt.ylabel('Avg. number of vois',fontsize=fontSize)
     plt.title('Average number of vois per node',fontsize=fontSize)
     
-def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
+def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions,nodeSize):
     fontSize = 20
     plt.figure()
     G = nx.from_numpy_matrix(cityMap)
@@ -119,7 +119,7 @@ def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions):
     labels = {}
     for i in range(nCities):
         labels[i] = int(voiPositions[i])
-    nx.draw(G, poss, labels=labels)
+    nx.draw(G, poss, labels=labels,node_size = nodeSize,font_size = fontSize)
     plt.title('Scooter positions',fontsize=fontSize)
     
 def PlotGreatestFitness(nGenerations,greatestFitness):
@@ -133,12 +133,38 @@ def PlotGreatestFitness(nGenerations,greatestFitness):
     plt.title('Greatest fitness of population',fontsize=fontSize)
     plt.show()
 
+def UpdateLimitedVoiPositions(voiPositions,nodeUsage,noVoisToReposition,optimalVoiPositions):
+    nNodes = len(voiPositions)
+    
+    tooManyVois = np.maximum(voiPositions - optimalVoiPositions,0)
+    tooFewVois = np.maximum(optimalVoiPositions - voiPositions,0)
+    
+    #Add vois to nodes
+    weightedSortedNodeUsage = nodeUsage*tooFewVois/sum(nodeUsage*tooFewVois)*noVoisToReposition
+    addedVois = np.floor(weightedSortedNodeUsage)
+    
+    nVoisToPlace = noVoisToReposition - np.sum(addedVois)
+    sortingIndeces = np.argsort(weightedSortedNodeUsage - addedVois)
+    addedVois[sortingIndeces[int(nNodes-nVoisToPlace):nNodes]] += 1
+    
+    #Remove vois from nodes
+    removedVois = np.zeros(nNodes)
+    for i in range(noVoisToReposition):
+        nodeToTakeFrom = np.argmax(tooManyVois)
+        tooManyVois[nodeToTakeFrom] -= 1
+        removedVois[nodeToTakeFrom] +=1
+        
+    newVoiPositions = voiPositions + addedVois - removedVois
+    return newVoiPositions
+        
 
 #Import map to use and agents
-data_set = np.load('MapToUseNew.npz')
+#data_set = np.load('MapToUseNew.npz')
+data_set = np.load('TestAgentDistribution2.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
 uniformAgents = data_set['uniformAgents']
+distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
@@ -148,51 +174,60 @@ voiPositionData = np.load('200_2_0_nAgents.npz')
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 200
-nVois = 2*nCities
-nTimeSteps = 2
-nGroups = nAgents
+nAgents = 5000
+nVois = 0*nCities
+nTimeSteps = 1
 mutationProbabilityAgents = 0
+nGroups = int(nAgents)
+
+noVoisToReposition = 0
 
 #Load agents
 agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
+agents[0:nAgents,:] = distributedAgents[0:nAgents,:]
 
 #Initial voi distribution
 voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
-#voiPositions = voiPositionData['bestPositions']        ### OPTIMIZED VOI POSITIONS
+#voiPositions = voiPositionData['bestPositions']          ### (OPTIMIZED)
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
 voiDistanceFromCenter = np.zeros(nTimeSteps)
 voisPerNode = np.zeros((nCities, nTimeSteps))
 
-PlotAgentsStartEndDistribution(agents,nCities)
-
 for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
-    #voiPositions[:] = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
+    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+    #voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
     
     #Run simulation
-    fitness[iTime], maxFitness[iTime], newVoiPositions = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
+    fitness[iTime], maxFitness[iTime], newVoiPositions, nodeUsage = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
     
     voisPerNode[:,iTime] = newVoiPositions
     voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,newVoiPositions,networkCenter)
 
+    #newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,np.ones(nCities)*nVois/nCities) ### (UNIFORM)
+    #newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,voiPositionData['bestPositions']) ### (OPTIMIZED)
     voiPositions = newVoiPositions
 
 #Load data for GA fitness plot
 nGenerations = voiPositionData['nGenerations']
 greatestFitness = voiPositionData['greatestFitness']
 
+#nodeSize = (np.bincount(agents[:,1]) + np.bincount(agents[:,2]))/nAgents*20000
+nodeSize = (np.bincount(agents[:,2]))/nAgents*20000
+
 #Plots
 PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)
 PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
-#PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions)
-#PlotGreatestFitness(nGenerations, greatestFitness)
+PlotAgentsStartEndDistribution(agents,nCities)
+PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions,nodeSize)
+PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions,nodeSize)
+PlotGraphAndVois(cityMap,nCities,np.bincount(agents[:,1]) + np.bincount(agents[:,2]),cityPositions,nodeSize)
+PlotGreatestFitness(nGenerations, greatestFitness)
 plt.show()

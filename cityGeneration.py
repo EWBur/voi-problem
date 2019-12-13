@@ -43,32 +43,55 @@ def PlotGraph(edges, nodes):
     plt.plot(nodes[:, 0], nodes[:, 1], 'or', markersize=markerSize)
     plt.show()
     
-def initAgents(nAgents, nNodes):
+def initAgents(nAgents,nNodes,cityPositions):
     agents = np.zeros((nAgents, 3), dtype=np.int8)
     for i in range(nAgents):
         cityIndexes = [x for x in range(nNodes)]
         startCity = np.random.choice(cityIndexes, 1)
         currentCity = startCity
         cityIndexes.remove(startCity)
-        endCity = np.random.choice(cityIndexes, 1)
+        networkCenter = FindGraphCenter(cityPositions)
+        possibleEndNodes = np.delete(cityPositions,startCity,axis=0)
+        centerDistances = FindDistancesToCenter(possibleEndNodes,networkCenter)
+        endNodeProbability = GetEndNodeProbability(centerDistances)
+        endCity = np.random.choice(cityIndexes, 1, p = endNodeProbability)
         agents[i, 0] = currentCity
         agents[i, 1] = startCity
         agents[i, 2] = endCity
     return agents
+
+def FindGraphCenter(nodePositions):
+    networkCenter = np.sum(nodePositions,0)/np.size(nodePositions,0)
+    return networkCenter
+
+def FindDistancesToCenter(cityPositions,networkCenter):
+    xValues = cityPositions[:,0] - networkCenter[0]
+    yValues = cityPositions[:,1] - networkCenter[1]
+    centerDistances = np.sqrt(
+        np.power(xValues,2) + np.power(yValues,2))
+    return centerDistances
+
+def GetEndNodeProbability(centerDistances):
+    inverseDistance = 1/centerDistances
+    totalInverseDistance = sum(inverseDistance)
+    endNodeProbability = inverseDistance/totalInverseDistance
+    return endNodeProbability
     
 plt.close("all")
 
 nNodes = 30
 maxDist = 0.22
 nAgents = 5000
+'''
+np.random.seed(12378911)
+cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
+cityPositions = np.random.rand(nNodes, 2)
+cityMap = buildPaths(cityPositions, maxDist, nNodes)
+distributedAgents = initAgents(nAgents, nNodes,cityPositions)
+print(distributedAgents)
+'''
 
-#np.random.seed(12378911)
-#cityPositions = np.random.randint(0, high=10, size=(nNodes, 2))
-#cityPositions = np.random.rand(nNodes, 2)
-#cityMap = buildPaths(cityPositions, maxDist, nNodes)
-#uniformAgents = initAgents(nAgents, nNodes)
-
-np.savez('MapToUseNew', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), uniformAgents = uniformAgents)
+np.savez('TestAgentDistribution2', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), uniformAgents = np.array(uniformAgents), distributedAgents = distributedAgents)
 
 #data_set = np.load('Test2.npz')
 #cityMap = data_set['cityMap']
