@@ -160,7 +160,7 @@ def UpdateLimitedVoiPositions(voiPositions,nodeUsage,noVoisToReposition,optimalV
 
 #Import map to use and agents
 #data_set = np.load('MapToUseNew.npz')
-data_set = np.load('TestAgentDistribution2.npz')
+data_set = np.load('MapToUse4.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
 uniformAgents = data_set['uniformAgents']
@@ -174,7 +174,7 @@ voiPositionData = np.load('200_2_0_nAgents.npz')
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 5000
+nAgents = 1000
 nVois = 0*nCities
 nTimeSteps = 1
 mutationProbabilityAgents = 0
@@ -184,7 +184,7 @@ noVoisToReposition = 0
 
 #Load agents
 agents = np.zeros((nAgents,3),int)
-agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
+#agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 agents[0:nAgents,:] = distributedAgents[0:nAgents,:]
 
 #Initial voi distribution
