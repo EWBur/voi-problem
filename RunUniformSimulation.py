@@ -24,14 +24,15 @@ def PlotFitness(fitness,maxFitness,nAgents,nVois,nCities):
 plt.close("all")
 
 #Import map to use and agents
-data_set = np.load('MapToUseNew.npz')
+data_set = np.load('MapToUse4.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
 uniformAgents = data_set['uniformAgents']
+distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = np.asarray([50,100,150,200,250,300,400,500,600,750,1000,1250,1500])
+nAgents = np.asarray([50,100,150,200,250,300,400,500])
 nVois = np.asarray([1,2,3])*nCities
 nRepetitions = 1
 
@@ -45,7 +46,7 @@ for iVois in range(len(nVois)):
     for jAgents in range(len(nAgents)):
         for kRepetitions in range(nRepetitions):
         
-            agents = uniformAgents[0:nAgents[jAgents],:]
+            agents = distributedAgents[0:nAgents[jAgents],:]
             nGroups = int(nAgents[jAgents]*nGroupsPartial)
             
             voiPositions = np.ones(nCities)*nVois[iVois]/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
