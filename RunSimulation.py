@@ -66,13 +66,13 @@ def PlotFitness(fitness,maxFitness):
     meanRelativeVoiUsage = np.mean(np.divide(fitness,maxFitness))
     plt.figure()
     plt.plot(np.divide(fitness,maxFitness),'k',linewidth = lineWidth)
-    #plt.plot(np.ones(len(fitness))*meanRelativeVoiUsage,'--r',linewidth = lineWidth)
+    plt.plot(np.ones(len(fitness))*meanRelativeVoiUsage,'--r',linewidth = lineWidth)
     
     plt.xlabel('Simulated days',fontsize=fontSize)
     plt.ylabel('Relative scooter usage',fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
     #plt.title('Actual voi usage relative to maximum voi usage',fontsize=fontSize)
-    #plt.legend(['Relative voi usage','Mean relative voi usage (' + str(np.round(meanRelativeVoiUsage,3)) + ')'],fontsize=fontSize,frameon=False)
+    plt.legend(['Relative voi usage','Mean relative voi usage (' + str(np.round(meanRelativeVoiUsage,3)) + ')'],fontsize=fontSize,frameon=False)
     
 def PlotVoiDistanceFromCenter(voiDistanceFromCenter):
     fontSize = 60
@@ -172,15 +172,15 @@ distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
-voiPositionData = np.load('50_1_300.npz')
+voiPositionData = np.load('50_3_300.npz')
 
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 50
+nAgents = 250
 nVois = 1*nCities
-nTimeSteps = 100
+nTimeSteps = 1
 mutationProbabilityAgents = 0
 nGroups = int(nAgents)
 
@@ -204,8 +204,8 @@ for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
-    voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
+    voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+    #voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
     
     #Run simulation
     fitness[iTime], maxFitness[iTime], newVoiPositions, nodeUsage = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
