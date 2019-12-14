@@ -49,8 +49,9 @@ def PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions):
     plt.gca().set_aspect('equal', adjustable='box')
     
 def PlotFitness(fitness,maxFitness):
-    fontSize = 20
-    
+    fontSize = 60
+    lineWidth = 6
+    '''
     plt.figure()
     plt.plot(fitness,'r')
     plt.plot(maxFitness,'--k')
@@ -60,29 +61,30 @@ def PlotFitness(fitness,maxFitness):
     plt.legend(['Actual usage','Maximum usage'],fontsize=fontSize,frameon=False)
     plt.tick_params(axis='both', labelsize=fontSize)
     plt.title('Scooter usage',fontsize=fontSize)
+    '''
     
     meanRelativeVoiUsage = np.mean(np.divide(fitness,maxFitness))
-    
     plt.figure()
-    plt.plot(np.divide(fitness,maxFitness),'k')
-    plt.plot(np.ones(len(fitness))*meanRelativeVoiUsage,'--r')
+    plt.plot(np.divide(fitness,maxFitness),'k',linewidth = lineWidth)
+    #plt.plot(np.ones(len(fitness))*meanRelativeVoiUsage,'--r',linewidth = lineWidth)
     
-    plt.xlabel('Time',fontsize=fontSize)
-    plt.ylabel('Voi usage',fontsize=fontSize)
+    plt.xlabel('Simulated days',fontsize=fontSize)
+    plt.ylabel('Relative scooter usage',fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
-    plt.title('Actual voi usage relative to maximum voi usage',fontsize=fontSize)
-    plt.legend(['Relative voi usage','Mean relative voi usage (' + str(np.round(meanRelativeVoiUsage,3)) + ')'],fontsize=fontSize,frameon=False)
+    #plt.title('Actual voi usage relative to maximum voi usage',fontsize=fontSize)
+    #plt.legend(['Relative voi usage','Mean relative voi usage (' + str(np.round(meanRelativeVoiUsage,3)) + ')'],fontsize=fontSize,frameon=False)
     
 def PlotVoiDistanceFromCenter(voiDistanceFromCenter):
-    fontSize = 20
+    fontSize = 60
+    lineWidth = 6
     
     plt.figure()
-    plt.plot(voiDistanceFromCenter,'k')
+    plt.plot(voiDistanceFromCenter,'k',linewidth = lineWidth)
     
-    plt.xlabel('Time',fontsize=fontSize)
+    plt.xlabel('Simulated days',fontsize=fontSize)
     plt.ylabel('Mean distance',fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
-    plt.title('The scooters mean distance from the networks center',fontsize=fontSize)
+    #plt.title('The scooters mean distance from the networks center',fontsize=fontSize)
     
 def PlotAgentsStartEndDistribution(agents,nNodes):
     fontSize = 20
@@ -170,7 +172,7 @@ distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
-voiPositionData = np.load('50_1_0_nAgents.npz')
+voiPositionData = np.load('50_1_300.npz')
 
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
@@ -178,7 +180,7 @@ networkCenter = FindGraphCenter(cityPositions)
 #Model parameters
 nAgents = 50
 nVois = 1*nCities
-nTimeSteps = 10
+nTimeSteps = 100
 mutationProbabilityAgents = 0
 nGroups = int(nAgents)
 
@@ -190,8 +192,8 @@ agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = distributedAgents[0:nAgents,:]
 
 #Initial voi distribution
-#voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
-voiPositions = voiPositionData['bestPositions']          ### (OPTIMIZED)
+voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
+#voiPositions = voiPositionData['bestPositions']          ### (OPTIMIZED)
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
@@ -212,7 +214,7 @@ for iTime in range(nTimeSteps):
     voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,newVoiPositions,networkCenter)
 
     #newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,np.ones(nCities)*nVois/nCities) ### (UNIFORM)
-    newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,voiPositionData['bestPositions']) ### (OPTIMIZED)
+    #newVoiPositions = UpdateLimitedVoiPositions(newVoiPositions,nodeUsage,noVoisToReposition,voiPositionData['bestPositions']) ### (OPTIMIZED)
     voiPositions = newVoiPositions
 
 #Load data for GA fitness plot
@@ -222,11 +224,11 @@ greatestFitness = voiPositionData['greatestFitness']
 nodeSize = (np.bincount(agents[:,1]) + np.bincount(agents[:,2]))/nAgents*30000
 
 #Plots
-PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)
-PlotAverageVoisPerNode(voisPerNode)
+#PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions)
+#PlotAverageVoisPerNode(voisPerNode)
 PlotFitness(fitness,maxFitness)
 PlotVoiDistanceFromCenter(voiDistanceFromCenter)
-PlotAgentsStartEndDistribution(agents,nCities)
+#PlotAgentsStartEndDistribution(agents,nCities)
 PlotGraphAndVois(cityMap,nCities,voiPositionData['bestPositions'],cityPositions,nodeSize)
 #PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions,nodeSize)
 PlotGraphAndVois(cityMap,nCities,np.bincount(agents[:,1]) + np.bincount(agents[:,2]),cityPositions,nodeSize)

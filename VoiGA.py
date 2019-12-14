@@ -169,8 +169,9 @@ distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = 100
-nVois = nCities*1
+nAgents = 50
+nVoisPerNode = 3
+nVois = nCities*nVoisPerNode
 
 #Simulation parameters
 mutationProbabilityAgents = 0
@@ -187,7 +188,8 @@ crossoverProbability = 0.7
 creepRate = 0.2
 elitismNumber = 1
 zeroThreshold = 0
-bestPositionsSaveName = '100_1_0_nAgents'
+bestPositionsSaveName = str(nAgents) + '_' + str(nVoisPerNode) + '_' + str(nGenerations)
+#bestPositionsSaveName = '100_1_0_nAgents'
 
 #Initialize agents
 agents = np.zeros((nAgents,3),int)
