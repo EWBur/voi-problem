@@ -104,7 +104,7 @@ distributedAgents = initAgents(nAgents, nNodes,cityPositions)
 print(distributedAgents)
 '''
 
-np.savez('MapToUse4', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), distributedAgents = distributedAgents, uniformAgents = uniformAgents)
+np.savez('MapToUse5', cityMap = np.array(cityMap), cityPositions = np.array(cityPositions), distributedAgents = distributedAgents, uniformAgents = uniformAgents)
 
 #data_set = np.load('Test2.npz')
 #cityMap = data_set['cityMap']

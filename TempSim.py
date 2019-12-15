@@ -163,17 +163,20 @@ def MutateAgents(agents,nMutations,nNodes):
     return agents
 '''
 
-def MutateAgents(agents,mutationProbability,nNodes):
+def MutateAgents(agents,mutationProbability,nNodes,endNodeProbabilities):
     nAgents = np.size(agents,0)
     indecesToMutate = np.heaviside(-(np.random.rand(nAgents,2)-mutationProbability),0)
-    randomNodes = np.random.randint(0,nNodes,(nAgents,2))
-    agents[:,1:3] = agents[:,1:3] + indecesToMutate*(randomNodes - agents[:,1:3])   
+    randomNodes = np.random.randint(0,nNodes,(nAgents,1))
+    endNodes = np.random.choice(range(nNodes), (nAgents,1), p = endNodeProbabilities)
+    
+    agents[:,1] = agents[:,1] + indecesToMutate[:,0]*(randomNodes.T - agents[:,1])
+    agents[:,2] = agents[:,2] + indecesToMutate[:,1]*(endNodes.T - agents[:,2])
     return agents
 
 ## --------------- { RUNNING } --------------- ##
 
 
-def runSimulation(voiPositionsInit, nNodes, nAgents, cityMap, cityPositions, agentsInit, nGroups, mutationProbabilityAgents):
+def runSimulation(voiPositionsInit, nNodes, nAgents, cityMap, cityPositions, agentsInit, nGroups, mutationProbabilityAgents,endNodeProbabilities):
     voiUsage = 0
     maxVoiUsage = 0
     costRelation = 2#1.33
@@ -185,7 +188,7 @@ def runSimulation(voiPositionsInit, nNodes, nAgents, cityMap, cityPositions, age
     agents[:,:] = agentsInit[:,:]
     
     #Mutate agents start/end node
-    agents = MutateAgents(agents,mutationProbabilityAgents,nNodes)
+    agents = MutateAgents(agents,mutationProbabilityAgents,nNodes,endNodeProbabilities)
     
     #Go forward direction (start -> end)
     agents = ShuffleAgents(agents,nGroups)

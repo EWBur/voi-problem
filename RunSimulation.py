@@ -4,8 +4,8 @@ import TempSim
 import networkx as nx
 #%matplotlib qt
 
-def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents):
-    fitness, maxFitness, newVoiPositions, nodeUsage = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
+def FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents,endNodeProbabilities):
+    fitness, maxFitness, newVoiPositions, nodeUsage = TempSim.runSimulation(voiPositions, nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents,endNodeProbabilities)
     return fitness, maxFitness, newVoiPositions, nodeUsage
 
 '''
@@ -22,6 +22,19 @@ def initAgents(nAgents, nNodes):
         agents[i, 2] = endCity
     return agents
 '''
+
+def FindDistancesToCenter(cityPositions,networkCenter):
+    xValues = cityPositions[:,0] - networkCenter[0]
+    yValues = cityPositions[:,1] - networkCenter[1]
+    centerDistances = np.sqrt(
+        np.power(xValues,2) + np.power(yValues,2))
+    return centerDistances
+
+def GetEndNodeProbability(centerDistances):
+    inverseDistance = 1/centerDistances
+    totalInverseDistance = sum(inverseDistance)
+    endNodeProbability = inverseDistance/totalInverseDistance
+    return endNodeProbability
 
 def FindGraphCenter(nodePositions):
     networkCenter = np.sum(nodePositions,0)/np.size(nodePositions,0)
@@ -49,24 +62,24 @@ def PlotGraphAndIndices(cityMap,nCities,voiPositions,cityPositions):
     plt.gca().set_aspect('equal', adjustable='box')
     
 def PlotFitness(fitness,maxFitness):
-    fontSize = 60
-    lineWidth = 6
-    '''
-    plt.figure()
-    plt.plot(fitness,'r')
-    plt.plot(maxFitness,'--k')
+    fontSize = 40
+    lineWidth = 5
     
-    plt.xlabel('Time',fontsize=fontSize)
+    plt.figure()
+    plt.plot(maxFitness,'k',linewidth = lineWidth)
+    plt.plot(fitness,'r',linewidth = lineWidth)
+    
+    plt.xlabel('Simulated days',fontsize=fontSize)
     plt.ylabel('Scooter usage',fontsize=fontSize)
-    plt.legend(['Actual usage','Maximum usage'],fontsize=fontSize,frameon=False)
+    plt.legend(['Maximum usage','Actual usage'],fontsize=fontSize,frameon=False)
     plt.tick_params(axis='both', labelsize=fontSize)
-    plt.title('Scooter usage',fontsize=fontSize)
-    '''
+    #plt.title('Scooter usage',fontsize=fontSize)
     
     meanRelativeVoiUsage = np.mean(np.divide(fitness,maxFitness))
     plt.figure()
     plt.plot(np.divide(fitness,maxFitness),'k',linewidth = lineWidth)
     plt.plot(np.ones(len(fitness))*meanRelativeVoiUsage,'--r',linewidth = lineWidth)
+    print(meanRelativeVoiUsage)
     
     plt.xlabel('Simulated days',fontsize=fontSize)
     plt.ylabel('Relative scooter usage',fontsize=fontSize)
@@ -112,6 +125,7 @@ def PlotAverageVoisPerNode(voisPerNode):
     
 def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions,nodeSize):
     fontSize = 50
+    edgeWidth = 5
     plt.figure()
     G = nx.from_numpy_matrix(cityMap)
     indices = {}
@@ -122,7 +136,7 @@ def PlotGraphAndVois(cityMap,nCities,voiPositions,cityPositions,nodeSize):
     labels = {}
     for i in range(nCities):
         labels[i] = int(voiPositions[i])
-    nx.draw(G, poss, labels=labels,node_size = nodeSize,font_size = fontSize)
+    nx.draw(G, poss, labels=labels,node_size = nodeSize,font_size = fontSize,width=edgeWidth)
     plt.title('Scooter positions',fontsize=fontSize)
     plt.gca().set_aspect('equal', adjustable='box')
     
@@ -172,17 +186,19 @@ distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
-voiPositionData = np.load('75_3_300.npz')
+voiPositionData = np.load('250_3_300.npz')
 
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
+centerDistances = FindDistancesToCenter(cityPositions,networkCenter)
+endNodeProbabilities = GetEndNodeProbability(centerDistances)
 
 #Model parameters
-nAgents = 100
+nAgents = 50
 nVois = 3*nCities
-nTimeSteps = 1
-mutationProbabilityAgents = 0
-nGroups = int(nAgents)
+nTimeSteps = 300
+mutationProbabilityAgents = 0.1
+nGroups = int(nAgents/10)
 
 noVoisToReposition = 0
 
@@ -204,11 +220,11 @@ for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
-    voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
+    voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+    #voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
     
     #Run simulation
-    fitness[iTime], maxFitness[iTime], newVoiPositions, nodeUsage = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
+    fitness[iTime], maxFitness[iTime], newVoiPositions, nodeUsage = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents,endNodeProbabilities)
     
     voisPerNode[:,iTime] = newVoiPositions
     voiDistanceFromCenter[iTime] = VoiDistanceFromCenter(cityPositions,newVoiPositions,networkCenter)
