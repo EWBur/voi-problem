@@ -186,7 +186,7 @@ distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
-voiPositionData = np.load('250_3_300.npz')
+voiPositionData = np.load('150_3_300.npz')
 
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
@@ -194,7 +194,7 @@ centerDistances = FindDistancesToCenter(cityPositions,networkCenter)
 endNodeProbabilities = GetEndNodeProbability(centerDistances)
 
 #Model parameters
-nAgents = 50
+nAgents = 150
 nVois = 3*nCities
 nTimeSteps = 300
 mutationProbabilityAgents = 0.1
@@ -220,8 +220,8 @@ for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
-    #voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
+    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+    voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
     
     #Run simulation
     fitness[iTime], maxFitness[iTime], newVoiPositions, nodeUsage = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents,endNodeProbabilities)
