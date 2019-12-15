@@ -23,6 +23,32 @@ def PlotFitness(fitness,maxFitness,nAgents,nVois,nCities):
     
 plt.close("all")
 
+def PlotFitnessParameters():
+    agents = [50,75,100,125,150,200]
+    optimized = [[0.916,0.998,0.998],[0.798,0.947,0.996],[0.760,0.936,0],[0,0,0],[0,0,0],[0,0,0]]
+    uniform = [[0.810,0.969,0.999,1.000],[0.733,0.929,0.973,0.995],[0.709,0.899,0.955,0.985],[0.711,0.873,0.939,0.966],[0.669,0.857,0.921,0.961],[0.634,0.806,0.903,0.953]]
+    nVoisPerNode = [30,60,90,30,60,90]
+    
+    markerSize = 20
+    lineWidth = 5
+    
+    plt.figure()
+    plt.plot(agents,np.transpose(optimized)[0],'r',marker = 'o',markersize = markerSize,linewidth=lineWidth)
+    plt.plot(agents,np.transpose(optimized)[1],'r',marker = '^',markersize = markerSize,linewidth=lineWidth)
+    plt.plot(agents,np.transpose(optimized)[2],'r',marker = 's',markersize = markerSize,linewidth=lineWidth)
+    
+    plt.plot(agents,np.transpose(uniform)[0],'k',marker = 'o',markersize = markerSize,linewidth=lineWidth)
+    plt.plot(agents,np.transpose(uniform)[1],'k',marker = '^',markersize = markerSize,linewidth=lineWidth)
+    plt.plot(agents,np.transpose(uniform)[2],'k',marker = 's',markersize = markerSize,linewidth=lineWidth)
+        
+    fontSize = 40    
+        
+    plt.xlabel('Number of agents',fontsize=fontSize)
+    plt.ylabel('Relative voi usage',fontsize=fontSize)
+    plt.tick_params(axis='both', labelsize=fontSize)
+    #plt.title('Actual voi usage relative to maximum voi usage',fontsize=fontSize)
+    plt.legend(nVoisPerNode,fontsize=fontSize,frameon=False,title='Number of scooters', title_fontsize=fontSize)
+
 #Import map to use and agents
 data_set = np.load('MapToUse4.npz')
 cityMap = data_set['cityMap']
@@ -32,8 +58,8 @@ distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = np.asarray([50,100,150,200,250,300,400,500])
-nVois = np.asarray([1,2,3])*nCities
+nAgents = np.asarray([1])
+nVois = np.asarray([1])*nCities
 nRepetitions = 1
 
 mutationProbabilityAgents = 0
@@ -58,4 +84,5 @@ for iVois in range(len(nVois)):
             maxFitnessData[iVois,jAgents] += maxFitnessTemp/nRepetitions
 #Plots
 PlotFitness(fitnessData,maxFitnessData,nAgents,nVois,nCities)
+PlotFitnessParameters()
 plt.show()

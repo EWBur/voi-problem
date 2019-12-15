@@ -172,14 +172,14 @@ distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Import optimized voi positions
-voiPositionData = np.load('50_3_300.npz')
+voiPositionData = np.load('75_3_300.npz')
 
 #Compute the graphs center
 networkCenter = FindGraphCenter(cityPositions)
 
 #Model parameters
-nAgents = 250
-nVois = 1*nCities
+nAgents = 100
+nVois = 3*nCities
 nTimeSteps = 1
 mutationProbabilityAgents = 0
 nGroups = int(nAgents)
@@ -192,8 +192,8 @@ agents = np.zeros((nAgents,3),int)
 agents[0:nAgents,:] = distributedAgents[0:nAgents,:]
 
 #Initial voi distribution
-voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
-#voiPositions = voiPositionData['bestPositions']          ### (OPTIMIZED)
+#voiPositions = np.ones(nCities)*nVois/nCities           ### UNIFORM VOI POSITIONS
+voiPositions = voiPositionData['bestPositions']          ### (OPTIMIZED)
 
 fitness = np.zeros(nTimeSteps)
 maxFitness = np.zeros(nTimeSteps)
@@ -204,8 +204,8 @@ for iTime in range(nTimeSteps):
     if np.mod(iTime+1, nTimeSteps/10) == 0:
         print('Progress: ' + str((iTime+1)/nTimeSteps*100) + ' %')
         
-    voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
-    #voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
+    #voiPositions = np.ones(nCities)*nVois/nCities ### RESETS ALL VOI POSITIONS EVERY DAY (UNIFORMLY)
+    voiPositions = voiPositionData['bestPositions'] ### RESETS ALL VOI POSITIONS EVERY DAY (OPTIMIZED)
     
     #Run simulation
     fitness[iTime], maxFitness[iTime], newVoiPositions, nodeUsage = FitnessOfPopulation(voiPositions, nCities, nAgents, cityMap, cityPositions,agents, nGroups, mutationProbabilityAgents)
