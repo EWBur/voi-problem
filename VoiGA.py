@@ -5,6 +5,27 @@ import time
 import networkx as nx
 #%matplotlib qt
 
+def FindDistancesToCenter(cityPositions,networkCenter):
+    xValues = cityPositions[:,0] - networkCenter[0]
+    yValues = cityPositions[:,1] - networkCenter[1]
+    centerDistances = np.sqrt(
+        np.power(xValues,2) + np.power(yValues,2))
+    return centerDistances
+
+def GetEndNodeProbability(centerDistances):
+    inverseDistance = 1/centerDistances
+    totalInverseDistance = sum(inverseDistance)
+    endNodeProbability = inverseDistance/totalInverseDistance
+    return endNodeProbability
+
+def FindGraphCenter(nodePositions):
+    networkCenter = np.sum(nodePositions,0)/np.size(nodePositions,0)
+    return networkCenter
+
+def VoiDistanceFromCenter(nodePositions,voiPositions,networkCenter):
+    voiDistanceFromCenter = np.matmul(voiPositions,np.sqrt(np.sum((nodePositions-networkCenter)**2,1)))/np.sum(voiPositions)
+    return voiDistanceFromCenter
+
 def InitializePopulation(nCities, populationSize):
     population = np.random.rand(populationSize, nCities)
     return population
@@ -78,14 +99,14 @@ def DecodePopulationDynamic(nVoisToMove,population,cityMap,voiPositions):
     return moveMatrix
 
 
-def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositions, nRepetitions, agents, nGroups,mutationProbabilityAgents):
+def FitnessOfPopulation(decodedPopulation, nCities, nAgents, cityMap, cityPositions, nRepetitions, agents, nGroups,mutationProbabilityAgents,endNodeProbabilities):
     nIndividuals = np.size(decodedPopulation, 0)
     populationFitness = np.zeros(nIndividuals)
     maxPopulationFitness = np.zeros(nIndividuals)
     
     for vv in range(nIndividuals):
         for iRepetition in range(nRepetitions):
-            tempFitness, tempMaxPopulation, newVoiPositions, nodeUsage = TempSim.runSimulation(decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents)
+            tempFitness, tempMaxPopulation, newVoiPositions, nodeUsage = TempSim.runSimulation(decodedPopulation[vv, :], nCities, nAgents, cityMap, cityPositions, agents, nGroups, mutationProbabilityAgents,endNodeProbabilities)
         
         populationFitness[vv] += tempFitness/nRepetitions
         maxPopulationFitness[vv] += tempMaxPopulation/nRepetitions
@@ -196,6 +217,11 @@ agents = np.zeros((nAgents,3),int)
 #agents[0:nAgents,:] = uniformAgents[0:nAgents,:]
 agents[0:nAgents,:] = distributedAgents[0:nAgents,:]
 
+#Compute the graphs center
+networkCenter = FindGraphCenter(cityPositions)
+centerDistances = FindDistancesToCenter(cityPositions,networkCenter)
+endNodeProbabilities = GetEndNodeProbability(centerDistances)
+
 #Initialize GA population
 population = InitializePopulation(nCities, populationSize)
 
@@ -216,7 +242,7 @@ for iTime in range(nGenerations):
     #Decode population to voi positions and run through simulation
     decodedPopulation = DecodePopulationNew(nVois, population, zeroThreshold)
     populationFitness, maxPopulationFitness = FitnessOfPopulation(
-        decodedPopulation, nCities, nAgents, cityMap, cityPositions,nRepetitions, agents, nGroups, mutationProbabilityAgents)
+        decodedPopulation, nCities, nAgents, cityMap, cityPositions,nRepetitions, agents, nGroups, mutationProbabilityAgents,endNodeProbabilities)
     
     #Save data of greatest chromosome
     populationFitness = np.divide(populationFitness,maxPopulationFitness)
