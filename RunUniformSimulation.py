@@ -54,42 +54,69 @@ def PlotFitnessParameters():
     optimized0101 = [[0.914,0.988,0.994],[0.792,0.972,0.993],[0.745,0.939,0.982],[0.720,0.917,0.970],[0.704,0.885,0.968],[0.671,0.850,0.947],[0.658,0.837,0.932],[0.646,0.813,0.901]]
     uniform0101 = [[0.845,0.975,0.997],[0.757,0.939,0.979],[0.712,0.906,0.962],[0.705,0.882,0.946],[0.682,0.857,0.932],[0.647,0.823,0.914],[0.648,0.816,0.905],[0.638,0.792,0.884]]
     
+    agentsCampus = [100,150,200,250,300,350,400,450,500]
+    uniformCampus = [[0.901, 0.985, 0.999],[0.858,0.966,0.991],[0.826,0.943,0.978],[0.762,0.891,0.947],[0.735,0.864,0.926],[0.715,0.842,0.905],[0.680,0.818,0.881],[0.659,0.799,0.861],[0.638,0.781,0.844]]
+    
     markerSize = 20
     lineWidth = 5
     
     plt.figure()
+    ax = plt.subplot(111)
     plt.plot(agents,np.transpose(optimized)[0],'r',marker = 'o',markersize = markerSize,linewidth=lineWidth)
     plt.plot(agents,np.transpose(optimized)[1],'r',marker = '^',markersize = markerSize,linewidth=lineWidth)
     plt.plot(agents,np.transpose(optimized)[2],'r',marker = 's',markersize = markerSize,linewidth=lineWidth)
     
-    plt.plot(agents,np.transpose(uniform)[0],'k',marker = 'o',markersize = markerSize,linewidth=lineWidth)
-    plt.plot(agents,np.transpose(uniform)[1],'k',marker = '^',markersize = markerSize,linewidth=lineWidth)
-    plt.plot(agents,np.transpose(uniform)[2],'k',marker = 's',markersize = markerSize,linewidth=lineWidth)
+    plt.plot(agents,np.transpose(uniform)[2],'k',marker = 's',markersize = markerSize,linewidth=lineWidth, label = '90')
+    plt.plot(agents,np.transpose(uniform)[1],'k',marker = '^',markersize = markerSize,linewidth=lineWidth, label = '60')
+    plt.plot(agents,np.transpose(uniform)[0],'k',marker = 'o',markersize = markerSize,linewidth=lineWidth,label = '30')
         
     fontSize = 40    
-        
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     plt.xlabel('Number of agents',fontsize=fontSize)
     plt.ylabel('Relative scooter usage',fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
     #plt.title('Actual voi usage relative to maximum voi usage',fontsize=fontSize)
-    plt.legend(nVoisPerNode,fontsize=fontSize,frameon=False,title='Number of scooters', title_fontsize=fontSize)
+    #plt.legend(nVoisPerNode,fontsize=fontSize,frameon=False,title='Number of scooters', title_fontsize=fontSize)
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5),fontsize=fontSize,frameon=False,title='Number of scooters', title_fontsize=fontSize)
     
     plt.figure()
+    ax = plt.subplot(111)
     plt.plot(agents,np.transpose(optimized0101)[0],'r',marker = 'o',markersize = markerSize,linewidth=lineWidth)
     plt.plot(agents,np.transpose(optimized0101)[1],'r',marker = '^',markersize = markerSize,linewidth=lineWidth)
     plt.plot(agents,np.transpose(optimized0101)[2],'r',marker = 's',markersize = markerSize,linewidth=lineWidth)
     
-    plt.plot(agents,np.transpose(uniform0101)[0],'k',marker = 'o',markersize = markerSize,linewidth=lineWidth)
-    plt.plot(agents,np.transpose(uniform0101)[1],'k',marker = '^',markersize = markerSize,linewidth=lineWidth)
-    plt.plot(agents,np.transpose(uniform0101)[2],'k',marker = 's',markersize = markerSize,linewidth=lineWidth)
+    plt.plot(agents,np.transpose(uniform0101)[2],'k',marker = 's',markersize = markerSize,linewidth=lineWidth,label = '90')
+    plt.plot(agents,np.transpose(uniform0101)[1],'k',marker = '^',markersize = markerSize,linewidth=lineWidth,label = '60')
+    plt.plot(agents,np.transpose(uniform0101)[0],'k',marker = 'o',markersize = markerSize,linewidth=lineWidth,label = '30')
         
     fontSize = 40    
-        
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     plt.xlabel('Number of agents',fontsize=fontSize)
     plt.ylabel('Relative scooter usage',fontsize=fontSize)
     plt.tick_params(axis='both', labelsize=fontSize)
     #plt.title('Actual voi usage relative to maximum voi usage',fontsize=fontSize)
-    plt.legend(nVoisPerNode,fontsize=fontSize,frameon=False,title='Number of scooters', title_fontsize=fontSize)
+    #plt.legend(nVoisPerNode,fontsize=fontSize,frameon=False,title='Number of scooters', title_fontsize=fontSize)
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5),fontsize=fontSize,frameon=False,title='Number of scooters', title_fontsize=fontSize)
+    
+    plt.figure()
+    ax = plt.subplot(111)
+    
+    plt.plot(agentsCampus,np.transpose(uniformCampus)[2],'k',marker = 's',markersize = markerSize,linewidth=lineWidth,label = '252')
+    plt.plot(agentsCampus,np.transpose(uniformCampus)[1],'k',marker = '^',markersize = markerSize,linewidth=lineWidth,label = '168')
+    plt.plot(agentsCampus,np.transpose(uniformCampus)[0],'k',marker = 'o',markersize = markerSize,linewidth=lineWidth,label = '84')
+        
+    fontSize = 40    
+    box = ax.get_position()
+    ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+    plt.xlabel('Number of agents',fontsize=fontSize)
+    plt.ylabel('Relative scooter usage',fontsize=fontSize)
+    plt.tick_params(axis='both', labelsize=fontSize)
+    #plt.title('Actual voi usage relative to maximum voi usage',fontsize=fontSize)
+    #plt.legend(nVoisPerNode,fontsize=fontSize,frameon=False,title='Number of scooters', title_fontsize=fontSize)
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5),fontsize=fontSize,frameon=False,title='Number of scooters', title_fontsize=fontSize)
+    
 
 #Import map to use and agents
 data_set = np.load('MapToUse4.npz')

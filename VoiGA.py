@@ -182,16 +182,17 @@ plt.close("all")
 startTime = time.time()
 
 #Load city data
-data_set = np.load('MapToUse4.npz')
+#data_set = np.load('MapToUse4.npz')
+data_set = np.load('TestOXMap.npz')
 cityMap = data_set['cityMap']
 cityPositions = data_set['cityPositions']
-uniformAgents = data_set['uniformAgents']
+#uniformAgents = data_set['uniformAgents']
 distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = 125
-nVoisPerNode = 3
+nAgents = 100
+nVoisPerNode = 1
 nVois = nCities*nVoisPerNode
 
 #Simulation parameters
@@ -209,7 +210,7 @@ crossoverProbability = 0.7
 creepRate = 0.2
 elitismNumber = 1
 zeroThreshold = 0
-bestPositionsSaveName = str(nAgents) + '_' + str(nVoisPerNode) + '_' + str(nGenerations)
+bestPositionsSaveName = str(nAgents) + '_' + str(nVoisPerNode) + '_' + str(nGenerations) + '_Campus'
 #bestPositionsSaveName = '100_1_0_nAgents'
 
 #Initialize agents
