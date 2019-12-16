@@ -7,7 +7,7 @@ import numpy as np
 G = ox.core.graph_from_bbox(
     57.6943, 57.6852, 11.9832, 11.9721, network_type='drive', simplify=True)
 
-#ox.plot_graph(G)
+ox.plot_graph(G)
 fig, ax = plt.subplots()
 node_list = G.nodes()
 edge_nodes = G.edges()

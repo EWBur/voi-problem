@@ -130,9 +130,9 @@ uniformAgents = data_set['uniformAgents']
 nNodes = np.size(cityMap,0)
 
 #Model parameters
-nAgents = 5
+nAgents = 50
 nVois = nNodes*2
-nTimeSteps = 20
+nTimeSteps = 10
 nGroups = nAgents
 mutationProbabilityAgents = 0
 
@@ -167,22 +167,29 @@ ims = []
 def update(iTime,*fargs):
     (asd,agents,cityMap,voiPositions) = fargs
     ax.clear()
-    #### Go forward direction (start -> end)
-    #agents = ShuffleAgents(agents,nGroups)
     for a in agents:
-        print(voiPositions)
         (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, 0, 0,0)
-        node_color = ['green' if voiPositions[n] >= 1 else 'blue' for n in G.nodes]
+        node_color = ['yellow' if voiPositions[n] == 1 else 'green' if voiPositions[n] >= 1 else 'grey' for n in G.nodes]
         for p in path:
             node_color[p] = 'red'
             nx.draw(G, pos=poss,node_color=node_color, ax=ax)
             plt.pause(0.1)
         plt.pause(0.25)
 
-    #### Go reverse direction (end -> start)
-    #agents = ShuffleAgents(agents,nGroups)
-    #for a in agents:
-    #    (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, voiUsage, maxVoiUsage,1)
+def update2(iTime,*fargs):
+    (asd, agents, cityMap, voiPositions) = fargs
+    ax.clear()
+    for a in agents:
+        (path, voiUsage, maxVoiUsage) = pathFindingDistances(a, cityMap, voiPositions, 0, 0,0)
+        node_color = ['yellow' if voiPositions[n] == 1 else 'green' if voiPositions[n] >= 1 else 'grey' for n in G.nodes]
+        nx.draw(G, pos=poss, node_color=node_color, ax=ax)
+        for p in range(len(path)-1):
+            pth = path(p)
+            for i in range(5):
+                xpos = 
+                ax.scatter()
+                plt.pause(0.1)
+        plt.pause(0.25)
 
 
 ###### LIVE VID -- Remove 'matplotlib.use('Agg')' in imports
