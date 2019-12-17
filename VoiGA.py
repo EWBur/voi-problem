@@ -191,7 +191,7 @@ distributedAgents = data_set['distributedAgents']
 nCities = np.size(cityMap,0)
 
 #Model parameters
-nAgents = 100
+nAgents = 200
 nVoisPerNode = 1
 nVois = nCities*nVoisPerNode
 
